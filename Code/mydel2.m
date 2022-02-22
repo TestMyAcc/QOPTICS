@@ -16,18 +16,18 @@ function laplacian = mydel2(F, dx, dy, dz)
 % 
 % Last revised on 07/12/2020
 
-if ~strcmp(class(F), 'gpuArray')
-    disp('F must be a gpuArray')
-    return
-end
+% if ~strcmp(class(F), 'gpuArray')
+%     disp('F must be a gpuArray')
+%     return
+% end
 
-[Nx, Ny, Nz] = size(F);
+[Ny, Nx, Nz] = size(F);
 
 xi = 2:(Nx-1);
 yi = 2:(Ny-1);
 zi = 2:(Nz-1);
 
-laplacian = gpuArray(zeros(Ny, Nx, Nz));
+laplacian = zeros(Ny, Nx, Nz);
 
 % interior points
 

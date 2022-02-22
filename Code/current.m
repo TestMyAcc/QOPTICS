@@ -1,4 +1,4 @@
-    function [Jx,Jy,Jz] = current(Data,dx,dy,dz,m)
+function [Jx,Jy,Jz] = current(Data,dx,dy,dz,m)
 %Current of three direction (with Dimension)
 %Data: Wavefunction
 %dx,dy,dz: resolution
