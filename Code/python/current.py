@@ -2,14 +2,13 @@ from numpy import pi
 from numpy import gradient
 from numpy import conjugate
     
-def current(data,dx,dy,dz,m):
+def current(data,dx: float,dy,dz,m):
     """Calculating probability density current
 
     Args:
         data: Wavefunction (3D, with unit)
         dx,dy,dz: Difference along 3 dimensions
-        m: mass of atoms 
-
+        m: mass of ato
     Returns:
         Jx, Jy, Jz: Probability density current 
             of three dimensions

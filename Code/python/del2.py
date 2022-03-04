@@ -4,20 +4,19 @@
 # In the memory order, index of last dimension change first.
 
 import numpy as np
-from scipy import ndimage 
 import time
 
 def timeit(fun,dx,dy,dz):
-    """Compare execution time of the fun with the one provided by packages"""
+    """Compare execution time of different implementation"""
     start_time1 = time.time()
-    calculate(fun,dx,dy,dz)
+    vectorized(F,dx,dy,dz)
     print("\n---hand-written in %s seconds ---\n" % (time.time() - start_time1))
     start_time2 = time.time()
-    ndimage.laplace(fun)
+    calculate(fun,dx,dy,dz)
     print("\n---py. module in %s seconds ---\n" % (time.time() - start_time2))
 
 
-def calculate(F, dx, dy, dz):
+def vectorized(F, dx, dy, dz):
     """Calculating discrete laplacian
     
     # TODO: order of accuracy.
@@ -40,6 +39,8 @@ def calculate(F, dx, dy, dz):
     boundary are dealt with separately. First, the points
     on surface are calculated, then the edge, finally the 
     vertexs.
+    
+    last revised on 2022/3/4
     """
     
     F = np.array(F)
@@ -166,6 +167,54 @@ def calculate(F, dx, dy, dz):
 
     laplacian[cuty,cutx,cutz] = bd_points
 
+    return laplacian
+
+
+def _test():
+    from scipy import filter
+    Lx = 2
+    Ly = 2
+    Lz = 2
+    Nx = 40
+    Nz = 40
+    Ny = 40
+    x = np.linspace(-Lx,Lx,Nx)
+    y = np.linspace(-Ly,Ly,Ny)
+    z = np.linspace(-Lz,Lz,Nz)
+    dx = 2*Lx/(Nx-1)
+    dy = 2*Ly/(Ny-1)
+    dz = 2*Lz/(Nz-1)
+
+    [X,Y,Z] = np.meshgrid(x,y,z)
+
+    F1 = np.sin(X)
+    F2 = X**2 + Y**2 + Z**2
+    F3 = (np.cos(X) + np.sin(Y))**2 + Y**2  + Z**2
+    F4 = np.exp(X+Y**2)/(np.log10(abs(Z))+1)
+
+    del2_F1 = del2.calculate(F1,dx,dy,dz)
+    del2_F2 = calculate(F2,dx,dy,dz)
+    del2_F3 = del2.calculate(F3,dx,dy,dz)
+    del2_F4 = del2.calculate(F4,dx,dy,dz)
+
+    py_del2_F1 = ndimage.laplace(F1)
+    py_del2_F2 = ndimage.laplace(F2)
+    py_del2_F3 = ndimage.laplace(F3,mode='nearest')
+    py_del2_F4 = ndimage.laplace(F4)
+    F1_sol = -np.sin(Z)
+    F3_sol = -2*( 2*np.cos(X)*np.sin(Y)+np.cos(2*X+)+np.sin(Y)**2 - np.cos(Y)**2-1 )
+
+
+
+def laplacian(dx, dy, dz, w):
+    """ Calculate the laplacian of the array w=[] """
+    laplacian = np.zeros(w.shape)
+    for z in range(1,w.shape[2]-1):
+        laplacian[:, :, z] = (1/dz)**2 * ( w[:, :, z+1] - 2*w[:, :, z] + w[:, :, z-1] )
+    for y in range(1,w.shape[0]-1):
+        laplacian[y, ...] = laplacian[y, :, :] + (1/dy)**2 * ( w[y+1, :, :] - 2*w[y, :, :] + w[y-1, :, :] )
+    for x in range(1,w.shape[1]-1):
+        laplacian[:, x,:] = laplacian[:, x, :] + (1/dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
     return laplacian
 
 

@@ -1,5 +1,5 @@
 function [Lx,Ly,Lz] = oam(Data,dx,dy,dz,Lambda)
-%Orbital angular momentum of the light(with Dimension)
+%Orbital angular momentum of the light
 %Data: the light
 %dx,dy,dz: resolution
 %Lambda: wavelengh

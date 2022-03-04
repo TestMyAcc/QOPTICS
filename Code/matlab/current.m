@@ -1,5 +1,5 @@
 function [Jx,Jy,Jz] = current(Data,dx,dy,dz,m)
-%Current of three direction (with Dimension)
+%Current of three direction
 %Data: Wavefunction
 %dx,dy,dz: resolution
 %m: mass
