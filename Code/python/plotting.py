@@ -1,47 +1,51 @@
 # Script using matplotlib
-
+# %%
 import numpy as np
 from matplotlib import pyplot as plt
 
 
 
-def plotter(fig,X,Y,cutz, mydel2, pydel2):
+def plotter1(fig,X,Y,cut, data1, data2):
+    """Compare Data by plot them in two subplots"""
+    """Data is 3D, need cut"""
     ax = fig.add_subplot(1, 2, 1, projection='3d')
-    surf = ax.plot_surface(X[:,:,cutz],Y[:,:,cutz],mydel2[:,:,cutz])
+    surf = ax.plot_surface(X[:,:,cut],Y[:,:,cut],data1[:,:,cut])
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    ax.set_title("Hand-written")
-    # ax.set_zlim(np.max(mydel2[:,:,cutz])+1,np.min(mydel2[:,:,cutz])-1)
+    ax.set_title("Data 1")
+    # ax.set_zlim(np.max(data1[:,:,cut])+1,np.min(data1[:,:,cut])-1)
     
     ax1 = fig.add_subplot(1, 2, 2, projection='3d')
-    ax1.plot_surface(X[:,:,cutz],Y[:,:,cutz],pydel2[:,:,cutz])
+    ax1.plot_surface(X[:,:,cut],Y[:,:,cut],data2[:,:,cut])
     ax1.set_xlabel('x')
     ax1.set_ylabel('y')
     ax1.set_zlabel('z')
-    ax1.set_title("Python package")
-    # ax1.set_zlim(np.max(mydel2[:,:,cutz])+1,np.min(mydel2[:,:,cutz])-1)
+    ax1.set_title("Data 2")
+    # ax1.set_zlim(np.max(data1[:,:,cut])+1,np.min(data1[:,:,cut])-1)
     plt.show()
     
     return ax,ax1
 
+# %%
+def plotter2(fig,x, data1, data2):
+    """Compare Data by plot them in two axes"""
+    """Data is 1D, and in the same axes"""
+    
+    fig, ax = plt.subplots()
+    ax.plot(x, data1, 'go', linewidth=2.0)
+    ax.plot(x, data2, linewidth=2.0)
+    plt.show()
+    
+    return ax
 
 
+# %%
 
-
-
-
-
-# cutz = 0
-# fig = plt.figure(figsize=plt.figaspect(0.5))
-# # exclude edges of xy-plane
-# xx = np.arange(1,Nx-1).reshape(1,Nx-2,1); 
-# yy = np.arange(1,Ny-1).reshape(Ny-2,1,1);
-# xx = np.arange(Nx).reshape(1,Nx,1)
-# yy = np.arange(Ny).reshape(Ny,1,1)
-
-# plotter(fig,np.squeeze(X[yy,xx,:]),np.squeeze(Y[yy,xx,:]),cutz,
-#         np.squeeze(del2_F2[yy,xx,:]),np.squeeze(py_del2_F2[yy,xx,:]))
+cut = 0
+fig,ax = plt.subplots()
+plotter1(fig, grid_x, grid_y, cut, TFsol, psiG)
+plotter2(fig, grid_x, grid_y, TFsol, psiG)
 
 
 

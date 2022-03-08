@@ -3,17 +3,16 @@
 #     np.array([[[ dim 3 ], ... dim 2 ... ]], ... dim 1 ... , [ ... ]]])
 # In the memory order, index of last dimension change first.
 
+from scipy.ndimage import laplace
 import numpy as np
 import time
 
 def timeit(fun,dx,dy,dz):
     """Compare execution time of different implementation"""
     start_time1 = time.time()
-    vectorized(F,dx,dy,dz)
+    vectorized(fun,dx,dy,dz)
     print("\n---hand-written in %s seconds ---\n" % (time.time() - start_time1))
-    start_time2 = time.time()
-    calculate(fun,dx,dy,dz)
-    print("\n---py. module in %s seconds ---\n" % (time.time() - start_time2))
+
 
 
 def vectorized(F, dx, dy, dz):
@@ -41,6 +40,10 @@ def vectorized(F, dx, dy, dz):
     vertexs.
     
     last revised on 2022/3/4
+    
+    !!
+    https://numpy.org/doc/stable/user/numpy-for-matlab-users.html
+    this article can save me a week!!! 2022/3/25
     """
     
     F = np.array(F)
@@ -156,6 +159,7 @@ def vectorized(F, dx, dy, dz):
     rightdown = ((1/dx**2)*(-5*F[0,-1-1,cutz] + 4*F[0,-1-2,cutz] - F[0,-1-3,cutz] + 2*F[0,-1,cutz]) 
         + (1/dy**2)*(-5*F[1,0,cutz] + 4*F[2,0,cutz] - F[3,0,cutz] + 2*F[0,0,cutz]))
 
+    # TODO: equivalent to np.block??
     bd_points = np.array([[leftdown, rightdown],[leftup, rightup]]).reshape(2,2,2)
     bd_p_arg1 = (1/dz**2)*(-5*F[cuty,cutx,1] + 4*F[cuty,cutx,2] - F[cuty,cutx,3] + 2*F[cuty,cutx,0])
     bd_p_arg2 = (1/dz**2)*(-5*F[cuty,cutx,-1-1] + 4*F[cuty,cutx,-1-2] - F[cuty,cutx,-1-3] + 2*F[cuty,cutx,-1])
@@ -170,8 +174,24 @@ def vectorized(F, dx, dy, dz):
     return laplacian
 
 
-def _test():
-    from scipy import filter
+
+
+
+
+
+def laplacian(dx, dy, dz, w):
+    """ Calculate the laplacian of the array w=[] """
+    laplacian = np.zeros(w.shape)
+    for z in range(1,w.shape[2]-1):
+        laplacian[:, :, z] = (1/dz)**2 * ( w[:, :, z+1] - 2*w[:, :, z] + w[:, :, z-1] )
+    for y in range(1,w.shape[0]-1):
+        laplacian[y, ...] = laplacian[y, :, :] + (1/dy)**2 * ( w[y+1, :, :] - 2*w[y, :, :] + w[y-1, :, :] )
+    for x in range(1,w.shape[1]-1):
+        laplacian[:, x,:] = laplacian[:, x, :] + (1/dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
+    return laplacian
+
+
+if __name__ == "__main__":
     Lx = 2
     Ly = 2
     Lz = 2
@@ -192,31 +212,14 @@ def _test():
     F3 = (np.cos(X) + np.sin(Y))**2 + Y**2  + Z**2
     F4 = np.exp(X+Y**2)/(np.log10(abs(Z))+1)
 
-    del2_F1 = del2.calculate(F1,dx,dy,dz)
-    del2_F2 = calculate(F2,dx,dy,dz)
-    del2_F3 = del2.calculate(F3,dx,dy,dz)
-    del2_F4 = del2.calculate(F4,dx,dy,dz)
+    del2_F1 = vectorized(F1,dx,dy,dz)
+    del2_F2 = vectorized(F2,dx,dy,dz)
+    del2_F3 = vectorized(F3,dx,dy,dz)
+    del2_F4 = vectorized(F4,dx,dy,dz)
 
-    py_del2_F1 = ndimage.laplace(F1)
-    py_del2_F2 = ndimage.laplace(F2)
-    py_del2_F3 = ndimage.laplace(F3,mode='nearest')
-    py_del2_F4 = ndimage.laplace(F4)
+    py_del2_F1 = laplace(F1)
+    py_del2_F2 = laplace(F2)
+    py_del2_F3 = laplace(F3,mode='nearest')
+    py_del2_F4 = laplace(F4)
     F1_sol = -np.sin(Z)
-    F3_sol = -2*( 2*np.cos(X)*np.sin(Y)+np.cos(2*X+)+np.sin(Y)**2 - np.cos(Y)**2-1 )
-
-
-
-def laplacian(dx, dy, dz, w):
-    """ Calculate the laplacian of the array w=[] """
-    laplacian = np.zeros(w.shape)
-    for z in range(1,w.shape[2]-1):
-        laplacian[:, :, z] = (1/dz)**2 * ( w[:, :, z+1] - 2*w[:, :, z] + w[:, :, z-1] )
-    for y in range(1,w.shape[0]-1):
-        laplacian[y, ...] = laplacian[y, :, :] + (1/dy)**2 * ( w[y+1, :, :] - 2*w[y, :, :] + w[y-1, :, :] )
-    for x in range(1,w.shape[1]-1):
-        laplacian[:, x,:] = laplacian[:, x, :] + (1/dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
-    return laplacian
-
-
-if __name__ == "__main__":
-    pass
+    F3_sol = -2*( 2*np.cos(X)*np.sin(Y)+np.cos(2*X+np.sin(Y)**2 - np.cos(Y)**2-1 ))
