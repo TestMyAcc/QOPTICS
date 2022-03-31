@@ -1,0 +1,16 @@
+w{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "..\\..\\Data"
+		},
+		{
+			"path": "..\\..\\LocalProgram"
+		}
+	],
+	"settings": {
+		"jupyter.jupyterServerType": "local"
+	}
+}

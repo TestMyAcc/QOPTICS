@@ -75,7 +75,7 @@ view([0 90])
 k = 0; 
 cmode = 'auto';             %% set to manual for the same colorbar limits
 
- zerosmtx = zeros(size(range1,2),size(range1,2));
+zerosmtx = zeros(size(range1,2),size(range1,2));
 for i = Row+1
 
     zi = 0;
@@ -109,7 +109,7 @@ for i = Row+1
       
         
         hold on
-        if isequal(plotwhat,'phase')
+        if isequal(d,'phase')
        
             hp = pcolor(X(range2,range2,idx_z(zi)),    Y(range2,range2,idx_z(zi)) , ...  
                 angle(squeeze(Data(range2,range2,idx_z(zi)))));   
