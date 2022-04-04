@@ -1,8 +1,5 @@
 # %%
-#BEGINNING
-from fileinput import filename
-from this import d
-from numba import njit
+#BEGINNING(GPU calculation)
 import cupy as cp
 import numpy as np
 import h5py
@@ -12,9 +9,9 @@ import h5py
 Nx = 121
 Ny = 121
 Nz = 121
-Lx = 60
-Ly = 60
-Lz = 60
+Lx = 10
+Ly = 10
+Lz = 10
 x = np.linspace(-Lx,Lx,Nx)
 y = np.linspace(-Ly,Ly,Ny)
 z = np.linspace(-Lz,Lz,Nz)
@@ -33,9 +30,9 @@ m = 1.411000000000000e-25  # Rb atoms
 As = 5.82e-09
 Nbec = 10000
 Rabi = 1000
-Wx = 1.38e-23/hbar
-Wy = 1.38e-23/hbar
-Wz = 1.38e-23/hbar
+Wx = 2000
+Wy = 2000
+Wz = 2000
 # unit = 1.222614572474304e-06;
 unit = np.sqrt(hbar/m/Wz)
 

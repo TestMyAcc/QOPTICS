@@ -1,4 +1,5 @@
 #TODO: find the physical meaning of my equation of Laguerre Gaussian beam
+#TODO: make produce light and plotting light more easier
 #%%
 from numba import njit
 import numpy as np
@@ -63,25 +64,24 @@ def main():
     Nx = 121
     Ny = 121
     Nz = 121
-    Lx = 60
-    Ly = 60
-    Lz = 60
+    Lx = 10
+    Ly = 10
+    Lz = 10
     x = np.linspace(-Lx,Lx,Nx)
     y = np.linspace(-Ly,Ly,Ny)
     z = np.linspace(-Lz,Lz,Nz)
     L = 1
     P = 0
     W0 = 1
-    Lambda = 200
+    Lambda = 1
     
     [X,Y,Z] = np.meshgrid(x, y, z)
     output = myLG(X,Y,Z, _W0=W0,_Lambda=Lambda,_L=L,_P=P)
     
     
     
-    # filename = input("the filename: ")
-    
-    base_dir = r'c:\\Users\\Lab\\Desktop\\Data\\local\\'
+    # base_dir = r'c:\\Users\\Lab\\Desktop\\Data\\local\\'
+    base_dir = r'/home/quojinhao/Data'
     print(f"storing data below {base_dir}\n")
     dirname = input("in which folder\n(empty for current folder): ")
     filename = f'LG{L}{P}_{Nx}-{Ny}-{Nz}'
