@@ -1,15 +1,16 @@
-
 #%%
-# __import__("matplotlib").use("Qt5Agg")  # or use %matplotlib in ipython
+# If Running in jupyter interactively would lead to suspend"
+__import__("matplotlib").use("Qt5Agg")  # or use %matplotlib widget in ipython
 import numpy as np
 from matplotlib import pyplot as plt
 import h5py
-import os
+import os,dirutils
+from matplotlib import cbook
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def plotter1(fig,X,Y,cut, data1, data2):
-    """Compare Data by plot them in two subplots"""
-    """Data is 3D, need cut"""
+    """Compare Cross-sections of two data subplots"""
     ax = fig.add_subplot(1, 2, 1, projection='3d')
     surf = ax.plot_surface(X[:,:,cut],Y[:,:,cut],data1[:,:,cut])
     ax.set_xlabel('x')
@@ -31,21 +32,56 @@ def plotter1(fig,X,Y,cut, data1, data2):
 
 
 def plotter2(fig,x, data1, data2):
-    """Compare Data by plot them in two axes"""
-    """Data is 1D, and in the same axes"""
-    
+    """Compare two data(array) int the same plot"""
     fig, ax = plt.subplots()
     ax.plot(x, data1, 'go', linewidth=2.0)
     ax.plot(x, data2, linewidth=2.0)
     plt.show()
-        
     return ax
 
-def plotting_data(ax_r, X, Y, Data, zindice, **kwargs):
+
+
+
+def get_demo_image():
+    z = cbook.get_sample_data("axes_grid/bivariate_normal.npy", np_load=True)
+    # z is a numpy array of 15x15
+    return z, (-3, 4, -4, 3)
+
+
+def get_test_data():
+    x = np.arange(-5,6) 
+    y = np.arange(-5,6) 
+    xx,yy = np.meshgrid(x,y)
+    zz = np.random.random(xx.shape)
+    return xx,yy,zz
+
+
+def add_cb(fig):
+    for ax in fig.get_axes():
+        divider = make_axes_locatable(ax)
+        ax_cb = divider.new_horizontal(size="5%", pad=0.05)
+        fig.add_axes(ax_cb)    
+        im = ax.collections[0]
+        fig.colorbar(im, cax=ax_cb)
+        ax_cb.yaxis.tick_right()
+        ax_cb.yaxis.set_tick_params(labelright=True)
+
+
+def add_label(ax_r, label):
+    axes = ax_r[0];
+    axes.set_ylabel(label)
+
+
+def add_slice(ax_r, coord):
+    for k, ax in enumerate(ax_r):
+        z = np.round(coord[k],3)
+        ax.set_title(f"z={z}")
+
+def plotting_data(ax_r, X, Y, Prop, zindice, **kwargs):
+    # plotting data along each row
     for i, ax in enumerate(ax_r):
-        contour = ax.pcolor(X[..., zindice[i]],Y[..., zindice[i]], Data[...,zindice[i]], **kwargs)
-        return contour
-    
+        contu = ax.pcolor(X[..., zindice[i]],Y[..., zindice[i]], Prop[...,zindice[i]], **kwargs)
+
 
 def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
     """Plotting the data, like comparison.m
@@ -75,8 +111,7 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         Geg = f['Parameters/Geg'][()]
         psiG = f['psiG'][...]
         psiE = f['psiE'][...]
-        # lgpath = f['LGfile'][()]
-        lgpath=''
+        lgpath = f['LGfile'][()]
         if (lgpath != ''):
             with h5py.File(lgpath, "r") as f:
                 LGdata = f['LGdata'][...]
@@ -110,7 +145,9 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         TF_pbb = np.sqrt(TF_amp)
         total = np.sum(np.abs(TF_pbb)**2*dx*dy*dz)
         n_TF_pbb = TF_pbb/np.sqrt(total)
-        
+      
+        # plotting part 
+        # compute the indexes of slices along axis-z 
         middle = int(np.ceil(Nz/2))
         firstnslice = int(np.ceil(nslice/2))
         secondnslice = int(np.floor(nslice/2))
@@ -122,7 +159,9 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         dims = np.zeros((nrow, nslice))
         w, h = plt.figaspect(dims)*2 
         fig, axs = plt.subplots(nrow, nslice, figsize=(w, h),tight_layout=True)
+        fig.suptitle("PsiG, psiE, LG beam comparison")
         
+        labels = [None]*3
         Data = np.zeros((*psiG.shape,3),dtype=np.cfloat)
         Data[...,0] = psiG
         Data[...,1] = psiE
@@ -132,100 +171,32 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         if (plotwhat == 'intensity'):
             Profile[...,0:2] = np.abs(Data[...,0:2])**2*dx*dy*dz #wavefunction
             Profile[...,-1] = np.abs(Data[...,-1])**2 #Light amplitude
+            labels[0:2] = ["|psiG|^2*dx*dy*dz", "|psiE|^2*dx*dy*dz"]
+            labels[-1] =  "|LG|^2"
+
         if (plotwhat == 'phase'):
             Profile[...] = np.arctan2(np.imag(Data[...]),np.real(Data[...]))
+            labels[0:2] = ["phase of psiG", "phase of psiE"]
+            labels[-1] =  "phase of LG"
             
+
+        add_slice(axs[0], z[zindice])
         for k,axs_row in enumerate(axs):
-            img = plotting_data(axs_row, X,Y, Profile[...,k], zindice)
+            add_label(axs_row, labels[k])
+            plotting_data(axs_row, X,Y, Profile[...,k], zindice)
             
-            # fig.subplots_adjust(right=0.1)
-            # cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-            # fig.colorbar(img, cax=cbar_ax)
-            
-        # for col,zidx in enumerate(zindice):
-        #     axs[0, col].pcolor(
-        #         X[..., z[zidx]],Y[..., z[zidx]], np.abs(n_TF_pbb[..., z[zidx]])**2*dx*dy*dz)
-        # for col,zidx in enumerate(zindice):
-        #     axs[1, col].pcolor(
-        #         X[..., z[zidx]],Y[..., z[zidx]], np.abs(psiG[..., z[zidx]])**2*dx*dy*dz)
-        # for col,zidx in enumerate(zindice):
-        #     axs[2, col].pcolor(
-        #         X[..., z[zidx]],Y[..., z[zidx]], np.abs(psiE[..., z[zidx]])**2*dx*dy*dz)
-        # elif (plotwhat == 'phase'):
-        #     for col,zidx in enumerate(zindice):
-        #         phase = np.arctan2(np.imag(psiG[:,:,cut])
-        #                             ,np.real(psiG[:,:,cut]))
-        #         axs[0, col].pcolor(
-        #             X[..., z[zidx]],Y[..., z[zidx]], np.abs(n_TF_pbb[..., z[zidx]])**2*dx*dy*dz)
-        #     for col,zidx in enumerate(zindice):
-        #         axs[1, col].pcolor(
-        #             X[..., z[zidx]],Y[..., z[zidx]], np.abs(psiG[..., z[zidx]])**2*dx*dy*dz)
-        #     for col,zidx in enumerate(zindice):
-        #         axs[2, col].pcolor(
-        #             X[..., z[zidx]],Y[..., z[zidx]], np.abs(psiE[..., z[zidx]])**2*dx*dy*dz)
-            
+        add_cb(fig)
         plt.show()
-        # plt.close()
+        plt.close()
 
-def example_plot(ax, fontsize=12):
-    ax.plot([1, 2])
-    ax.locator_params(nbins=3)
-    ax.set_xlabel('x-label', fontsize=fontsize)
-    ax.set_ylabel('y-label', fontsize=fontsize)
-    ax.set_title('Title', fontsize=fontsize)
 
-def annotate_axes(ax, text, fontsize=18):
-    ax.text(0.5, 0.5, text, transform=ax.transAxes,
-            ha="center", va="center", fontsize=fontsize, color="darkgrey")
 
 #%%
 if (__name__ == '__main__'):
-    import numpy as np
-    from matplotlib import pyplot as plt
-    import h5py
-    # plt.switch_backend('QtAgg4')
 
-    path = 'c:\\Users\\Lab\\Desktop\\Data\\local\\0331\\BEC_LP10_121-121-121.h5'
+    base_dir = os.path.expanduser("~/Data/")
+    filename = input("The filename:" + '\n' + dirutils.lsfiles(base_dir))
+    path = os.path.join(base_dir,filename) + '.h5'
     
-    plotdata(path,5,plotwhat='intensity') 
-    
-    # plt.close('all')
-    # fig, ax = plt.subplots()
-    # example_plot(ax, fontsize=30)
-    # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, tight_layout=False)
-    # example_plot(ax1)
-    # example_plot(ax2)
-    # example_plot(ax3)
-    # example_plot(ax4)
-    
-    
-    # fig = plt.figure()
-    # fig.add_subplot(231)
-    # ax1 = fig.add_subplot(2, 3, 1)  # equivalent but more general
-
-    # fig.add_subplot(232, frameon=False)  # subplot with no frame
-    # fig.add_subplot(233, projection='polar')  # polar subplot
-    # fig.add_subplot(234, sharex=ax1)  # subplot sharing x-axis with ax1
-    # fig.add_subplot(235, facecolor="red")  # red subplot
-
-    # ax1.remove()  # delete ax1 from the figure
-    # fig.add_subplot(ax1)  # add ax1 back to the figure
-                
-    
-    # fig, axd = plt.subplot_mosaic([['upper left', 'upper right'],
-    #                            ['lower left', 'lower right']],
-    #                           figsize=(5.5, 3.5), constrained_layout=True)
-    # for k in axd:
-    #     annotate_axes(axd[k], f'axd["{k}"]', fontsize=14)
-    # fig.suptitle('plt.subplot_mosaic()')
-    # cut = 0
-    # fig,ax = plt.subplots()
-    # plotter1(fig, grid_x, grid_y, cut, TFsol, psiG)
-    # plotter2(fig, grid_x, grid_y, TFsol, psiG)
-
-
-
-
-# %%
-
+    plotdata(path,5,plotwhat='phase')
 # %%
