@@ -1,15 +1,13 @@
 # %%
-import os
 import numpy as np
 import h5py
-import dirutils
+import dirutils,os
 
-base_dir = os.path.join(os.path.expanduser("~"),"Data")
-filenames = dirutils.listfiles(base_dir) 
-filename = input(f"Choose a filename from below:\n{filenames}")
 # %%
 # retrieve local h5py files
-path = os.path.join(base_dir, filename)
+base,filenames = dirutils.listLG() 
+filename = input(f"Choose a filename from below:\n{filenames}")
+path = os.path.join(base, filename)
 
 with h5py.File(path, "r") as f:
     LGdata = f['LGdata'][...]
@@ -41,7 +39,7 @@ fig.update_layout(title=filename, autosize=False,
 fig.show()
 
 #%% LG phase from python
-cut = 61
+cut = 0
 import plotly.graph_objects as go
 phase = np.arctan2(np.imag(LGdata[:,:,cut])
                   ,np.real(LGdata[:,:,cut]))

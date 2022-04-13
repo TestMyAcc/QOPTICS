@@ -3,6 +3,7 @@
 from numba import njit
 import numpy as np
 import h5py
+import dirutils,os
 # %%
 # Meta-parameters
 
@@ -17,13 +18,13 @@ y = np.linspace(-Ly,Ly,Ny)
 z = np.linspace(-Lz,Lz,Nz)
 Nx,Ny,Nz = len(x), len(y), len(z)
 [grid_x,grid_y,grid_z] = np.meshgrid(x,y,z)
-pi = 3.14159265359
 dx = np.diff(x)[0]
 dy = np.diff(y)[0]
 dz = np.diff(z)[0]
 dw = 1e-6   # condition for converge : <1e-3*dx**2
 
 # Some constants
+pi = 3.14159265359
 hbar = 1.054571800139113e-34 
 m = 1.411000000000000e-25  # Rb atoms
 # BEC parameters
@@ -56,13 +57,8 @@ n_TF_pbb = TF_pbb/np.sqrt(total)
 
 # Laguerre-Gaussian laser
 #%%
-import os
-base_dir = r'C:\\Users\\Lab\\Desktop\\Data\\local\\'
-print(f"reading LG data below {base_dir}\n")
-# filename = input("reading LG data from which file(subfolder/file)\n: ")
-filename = 'LG10_121-121-121'
-lgpath = os.path.join(base_dir, filename) + '.h5'
-
+lgpath = input("Specify filename\n"+dirutils.listLG()[1])
+lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath)
 if (os.path.exists(lgpath)):
     with h5py.File(lgpath, "r") as f:
         LGdata = f['LGdata'][...]
@@ -110,17 +106,6 @@ def compute_BEC_Euler(_psiG, _psiE, nj):
                 
         _psiG = _psiG_n
 
-        # if (j % stepJ) == 0:
-        # #  update energy constraint 
-        #     Nfactor = Normalize(_psiG,_psiE,dx,dy,dz)
-        #     # J = J + 1
-        #     _psiGmu = _psiGmu/(Nfactor)
-        #     _psiEmu = _psiEmu/(Nfactor)
-            
-            # psiEmuArray[J+1] = (np.sum(np.conjugate(_psiE)*  
-            #     (- 0.5 * 2*_psiE*del2(_psiE,dx,dy,dz) +     #Operated _psiE
-            #     ( Epot  + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2)*_psiE) 
-            #     *dx*dy*dz))
         if np.mod(j, stepJ) == 0:
             print(np.sum(np.abs(_psiG)**2*dx*dy*dz))
             print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
@@ -252,62 +237,91 @@ def Normalize(_psiG,_psiE,_dx,_dy,_dz):
 
 # %%
 import matplotlib.pyplot as plt
-nj = 200
-stepJ = 10
+nj = 200000
+stepJ = 2000
+psiGmuArray = np.zeros(100)
+psiEmuArray = np.zeros(100)
+
 psiG = np.array(n_TF_pbb+0.1,dtype=np.cfloat)
 psiE = np.zeros_like(n_TF_pbb,dtype=np.cfloat)
-print(np.sum(np.abs(TF_pbb)**2*dx*dy*dz))
+# psiG = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
+# psiE = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
+# %%
+print("abs|n_TF_pbb|^2")
+print(np.sum(np.abs(n_TF_pbb)**2*dx*dy*dz))
+print("abs|psiG|^2")
 print(np.sum(np.abs(psiG)**2*dx*dy*dz))
+print("abs|psiE|^2")
 print(np.sum(np.abs(psiE)**2*dx*dy*dz))
+#%%
 plt.figure()
 plt.plot(x, np.abs(n_TF_pbb[61,:,61])**2*dx*dy*dz)
+plt.xlabel("x")
+plt.title("n_TF_pbb")
+
 plt.figure()
 plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
+plt.xlabel("y")
+plt.title("n_TF_pbb")
+
 plt.figure()
 plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
+plt.xlabel("z")
+plt.title("n_TF_pbb")
+
 plt.figure()
 plt.plot(x, np.abs(psiG[61,:,61])**2*dx*dy*dz)
+plt.xlabel("x")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(y, np.abs(psiG[:,61,61]**2)*dx*dy*dz)
+plt.xlabel("y")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(z, np.abs(psiG[61,61,:]**2)*dx*dy*dz)
+plt.xlabel("z")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(x, np.abs(psiE[61,:,61])**2*dx*dy*dz)
+plt.xlabel("x")
+plt.title("psiE")
+
 plt.figure()
 plt.plot(y, np.abs(psiE[:,61,61]**2)*dx*dy*dz)
+plt.xlabel("y")
+plt.title("psiE")
+
 plt.figure()
 plt.plot(z, np.abs(psiE[61,61,:]**2)*dx*dy*dz)
+plt.xlabel("z")
+plt.title("psiE")
+
+plt.figure()
+plt.plot(x, np.abs(LGdata[61,:,61])**2*dx*dy*dz)
+plt.xlabel("x")
+plt.title("LG")
 print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
 #%%
-psiG, psiE = compute_BEC_Euler(psiG, psiE,nj)
-
-
-
-
-
-
-"""=============Main program above=============="""
-
-
+psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler(Epot, psiG, psiE,LG,nj)
 
 # %%
+"""=============Below are plotting code for quick reference=============="""
 # save data
 import h5py
 import os
 import numpy as np
+import dirutils
 
+base_dir = os.path.join(os.path.expanduser("~"),"Data")
+msg = f"storing data below {base_dir}"
+filename = input(msg+'\n'+"Specify the filename: ")
+path = (os.path.join(base_dir, filename)) + '.h5'
 
-base_dir = r'c:\\Users\\Lab\\Desktop\\Data\\local\\'
-print(f"storing data in {base_dir}....\n")
-foldername = input("in which folder: ")
-filename = input("the filename: ")
-dirpath = os.path.join((os.path.join(base_dir, foldername)))
-if os.path.isdir(dirpath) == False:
-    print(f"create new dir {dir}....\n")
-    os.mkdir(dirpath)
-path = os.path.join(dirpath, filename) + '.h5'
-if os.path.exists(path):
-    print("File already exists!, do nothing.")    
+if os.path.exists(path) or filename == '':
+    print("File already exists/Filename is empty!, do nothing.")   
 else:
     with h5py.File(path, "w") as f:
         f['psiG'] = psiG
@@ -340,7 +354,16 @@ else:
 #  retrieve BEC in h5py
 import h5py
 import numpy as np
-path = 'c:\\Users\\Lab\\Desktop\\Data\\local\\0331\\BEC_LP10_121-121-121.h5'
+import dirutils
+
+base_dir = os.path.join(os.path.expanduser("~"),"Data")
+filenames = dirutils.lsfiles(base_dir) 
+filename = input(f"Choose a filename from below:\n{filenames}")
+path = os.path.join(base_dir, filename)
+if not os.path.isfile(path):
+    print("File isn't exist!")
+
+#%%
 with h5py.File(path, "r") as f:
     psiG = f['psiG'][()]
     psiE = f['psiE'][()]
@@ -361,44 +384,126 @@ with h5py.File(path, "r") as f:
     Ggg = f['Parameters/Ggg'][()]
     Gee = f['Parameters/Gee'][()]
     Gge = f['Parameters/Gge'][()]
-    Geg = f['Parameters/Geg']
+    Geg = f['Parameters/Geg'][()]
+    lgpath = f['LGfile'][()]
     print("retrieving succeeded!")
-    xplot = np.linspace(-Lx,Lx,Nx)
-    yplot = np.linspace(-Ly,Ly,Ny)
-    zplot = np.linspace(-Lz,Lz,Nz)
-    dxplot = np.diff(xplot)[0]
-    dyplot = np.diff(yplot)[0]
-    dzplot = np.diff(zplot)[0]
-    Xplot,Yplot,Zplot = np.meshgrid(xplot,yplot,zplot)
 
+xplot = np.linspace(-Lx,Lx,Nx)
+yplot = np.linspace(-Ly,Ly,Ny)
+zplot = np.linspace(-Lz,Lz,Nz)
+dxplot = np.diff(xplot)[0]
+dyplot = np.diff(yplot)[0]
+dzplot = np.diff(zplot)[0]
+Xplot,Yplot,Zplot = np.meshgrid(xplot,yplot,zplot)
+# Some constants
+pi = 3.14159265359
+hbar = 1.054571800139113e-34 
+m = 1.411000000000000e-25  # Rb atoms
+# BEC parameters
+As = 5.82e-09
+Nbec = 10000
+Rabi = 1000
+Wx = 2000
+Wy = 2000
+Wz = 2000
+# unit = 1.222614572474304e-06;
+unit = np.sqrt(hbar/m/Wz)
 
+Ggg = (4*pi*hbar**2*As*Nbec/m)*unit**-3*(hbar*Wz)**-1
+Gee = Ggg  
+Gge = 0
+Geg = 0
+Epot = ( (Wx**2*Xplot**2 + Wy**2*Yplot**2 + Wz**2*Zplot**2 )
+            / (2*Wz**2) )
+# circular potential
+psiGmu = (15*Ggg / ( 16*pi*np.sqrt(2) )  )**(2/5)  
+psiEmu = (15*Gee / ( 16*pi*np.sqrt(2) )  )**(2/5) 
+
+if (os.path.exists(lgpath)):
+    with h5py.File(lgpath, "r") as f:
+        LGdata = f['LGdata'][...]
+        W0 = f['Parameters/W0']
+        Lambda = f['Parameters/Lambda']
+    Rabi = Rabi/Wz                                                                               
+    LG = 0.5*Rabi*LGdata
+    print(f"\nReading LGdata : {lgpath}\n")
+else:
+    print(f"\n{lgpath} doesn't exits!\nset LG = 0, lgpath to ''\n")
+    LG = 0
+    lgpath=''
+# psiGmu = (16*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
+# %%
+TF_amp = np.array((psiGmu-Epot)/Ggg,dtype=np.cfloat)
+np.clip(TF_amp, 0, np.inf,out=TF_amp)
+TF_pbb = np.sqrt(TF_amp)
+total = np.sum(np.abs(TF_pbb)**2*dxplot*dyplot*dzplot)
+n_TF_pbb = TF_pbb/np.sqrt(total)
 
 #%%
-print(np.sum(np.abs(TF_pbb)**2*dx*dy*dz))
+print(np.sum(np.abs(TF_pbb)**2*dxplot*dyplot*dzplot))
 print(np.sum(np.abs(psiG)**2*dxplot*dyplot*dzplot))
 print(np.sum(np.abs(psiE)**2*dxplot*dyplot*dzplot))
 
 #%%
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+print("abs|n_TF_pbb|^2")
+print(np.sum(np.abs(n_TF_pbb)**2*dxplot*dyplot*dzplot))
+print("abs|psiG|^2")
+print(np.sum(np.abs(psiG)**2*dxplot*dyplot*dzplot))
+print("abs|psiE|^2")
+print(np.sum(np.abs(psiE)**2*dxplot*dyplot*dzplot))
+#%%
+plt.figure()
+plt.plot(xplot, np.abs(n_TF_pbb[61,:,61])**2*dxplot*dyplot*dzplot)
+plt.xlabel("xplot")
+plt.title("n_TF_pbb")
+
+plt.figure()
+plt.plot(yplot, np.abs(n_TF_pbb[:,61,61]**2)*dxplot*dyplot*dzplot)
+plt.xlabel("yplot")
+plt.title("n_TF_pbb")
+
+plt.figure()
+plt.plot(zplot, np.abs(n_TF_pbb[61,61,:]**2)*dxplot*dyplot*dzplot)
+plt.xlabel("zplot")
+plt.title("n_TF_pbb")
+
 plt.figure()
 plt.plot(xplot, np.abs(psiG[61,:,61])**2*dxplot*dyplot*dzplot)
-plt.xlabel('z')
+plt.xlabel("xplot")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(yplot, np.abs(psiG[:,61,61]**2)*dxplot*dyplot*dzplot)
-plt.xlabel('y')
+plt.xlabel("yplot")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(zplot, np.abs(psiG[61,61,:]**2)*dxplot*dyplot*dzplot)
-plt.xlabel('z')
+plt.xlabel("zplot")
+plt.title("psiG")
+
 plt.figure()
 plt.plot(xplot, np.abs(psiE[61,:,61])**2*dxplot*dyplot*dzplot)
-plt.xlabel('x')
+plt.xlabel("xplot")
+plt.title("psiE")
+
 plt.figure()
 plt.plot(yplot, np.abs(psiE[:,61,61]**2)*dxplot*dyplot*dzplot)
-plt.xlabel('y')
+plt.xlabel("yplot")
+plt.title("psiE")
+
 plt.figure()
 plt.plot(zplot, np.abs(psiE[61,61,:]**2)*dxplot*dyplot*dzplot)
-plt.xlabel('z')
+plt.xlabel("zplot")
+plt.title("psiE")
+
+plt.figure()
+plt.plot(xplot, np.abs(LG[61,:,61])**2*dxplot*dyplot*dzplot)
+plt.xlabel("xplot")
+plt.title("LG")
+#
 
 
 #%%
@@ -434,7 +539,7 @@ fig.show()
 # ))
 
 
-# %% BEC intensity
+# %% intensity
 cut = 10
 import plotly.graph_objects as go
 fig = go.Figure(data=[go.Surface(x=xplot,y=yplot,z=np.abs(psiG[:,:,cut]**2*dxplot*dyplot*dzplot))])
@@ -448,8 +553,13 @@ fig.update_layout(title='psiE_intensity', autosize=False,
                   margin=dict(l=65, r=50, b=65, t=90))
 fig.show()
 
-# %% BEC phase
-cut = 10
+fig = go.Figure(data=[go.Surface(x=xplot,y=yplot,z=np.abs(LG[:,:,cut]**2*dxplot*dyplot*dzplot))])
+fig.update_layout(title='LG_intensity', autosize=False,
+                  width=500, height=500,
+                  margin=dict(l=65, r=50, b=65, t=90))
+fig.show()
+# %% phase
+cut = 0
 import plotly.graph_objects as go
 phase = np.arctan2(np.imag(psiG[:,:,cut])
                   ,np.real(psiG[:,:,cut]))
@@ -459,12 +569,20 @@ fig.update_layout(title='psiG_phase', autosize=False,
                   margin=dict(l=65, r=50, b=65, t=90))
 fig.show()
 
-phase = np.arctan2(np.imag(psiG[:,:,cut])
-                  ,np.real(psiG[:,:,cut]))
+phase = np.arctan2(np.imag(psiE[:,:,cut])
+                  ,np.real(psiE[:,:,cut]))
 fig = go.Figure(data=[go.Surface(x=xplot,y=yplot,z=phase)])
 fig.update_layout(title='psiE_phase', autosize=False,
                   width=500, height=500,
                   margin=dict(l=65, r=50, b=65, t=90))
 fig.show()
-# %%
 
+phase = np.arctan2(np.imag(LG[:,:,cut])
+                  ,np.real(LG[:,:,cut]))
+fig = go.Figure(data=[go.Surface(x=xplot,y=yplot,z=phase)])
+fig.update_layout(title='LG_phase', autosize=False,
+                  width=500, height=500,
+                  margin=dict(l=65, r=50, b=65, t=90))
+fig.show()
+
+# %%

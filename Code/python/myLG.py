@@ -1,4 +1,3 @@
-#TODO: find the physical meaning of my equation of Laguerre Gaussian beam
 #%%
 from numba import njit
 import numpy as np
@@ -83,12 +82,7 @@ def main():
     base_dir = os.path.join(os.path.expanduser("~"),"Data")
     print(f"storing data below {base_dir}")
     filename = f'LG{L}{P}_{Nx}-{Ny}-{Nz}'
-    # Assume all files are stored in ~/Data/, so below unnecessary
-    # dirpath = os.path.join((os.path.join(base_dir, dirname)))
-    # if os.path.isdir(dirpath) == False:
-    #     print(f"create new dir {dirpath}\\ \n")
-    #     os.mkdir(dirpath)
-    # path = os.path.join(dirpath, filename) + '.h5'
+    
     path = os.path.join(base_dir, filename) + '.h5'
     n = 1
     while (os.path.exists(path)):
