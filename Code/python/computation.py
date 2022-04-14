@@ -58,7 +58,7 @@ n_TF_pbb = TF_pbb/np.sqrt(total)
 # Laguerre-Gaussian laser
 #%%
 lgpath = input("Specify filename\n"+dirutils.listLG()[1])
-lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath)
+lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath) + '.h5'
 if (os.path.exists(lgpath)):
     with h5py.File(lgpath, "r") as f:
         LGdata = f['LGdata'][...]
@@ -111,22 +111,17 @@ def compute_BEC_Euler(_psiG, _psiE, nj):
             print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
     return _psiG, _psiE
 
-# %% 
-@njit(fastmath=True, nogil=True)
-def Hamiltonian(_psi, _G, _dx, _dy, _dz):
-    Energy = (np.sum( (np.conjugate(_psi) *  
-        (-0.5 *del2(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
-
-    return Energy
-
 # %%
 @njit(fastmath=True, nogil=True)
-def compute_BEC_RK4(_psiG, _psiE, nj):
+def compute_BEC_Euler_UpdateMu(
+    _psiG:np.ndarray, _psiE:np.ndarray, 
+    _psiGmuArray:np.ndarray, _psiEmuArray:np.ndarray,
+    nj:int, stepJ:int):
     """Calculating interaction between the BEC and L.G. beams.
     Two-order system is used. The code evaluates ground-
     state BEC and excited-state BEC, and save the data.
-    Note: Data is calculated without units. Use RK4 method to update
-    time.
+    Note: Data is calculated without units. Use Euler method
+    to update time.
    
     Args:
         nj: Number of iterations.
@@ -135,64 +130,46 @@ def compute_BEC_RK4(_psiG, _psiE, nj):
         x,y,z: coordinate vectors
         dw: finite time difference.
     """
-    
-    # Potential and initial condition
-    _psiGmu = psiGmu
-    # _psiEmu = psiEmu
-    # _psiE = np.zeros(TFsol.shape)
-    # _psiG = np.zeros(TFsol.shape)
-    # _psiG = TFsol
-    
+
+    _psiG_n = np.zeros_like(_psiG)    
+    J = 0
+    _psiGmu = _psiGmuArray[J]
+    _psiEmu = _psiEmuArray[J]
+
+
     for j in range(nj):
-        _psiG, _psiE = RK4(_psiG, _psiE, _psiGmu, _psiEmu, dw)
-         
-        if (j % stepJ) == 0:
+        
+        if (j % stepJ) == 0 and j != 0:
         #  update energy constraint 
             Nfactor = Normalize(_psiG,_psiE,dx,dy,dz)
             _psiGmu = _psiGmu/(Nfactor)
             _psiEmu = _psiEmu/(Nfactor)
-    
-    return _psiG, _psiE
+            J = J + 1
+            _psiGmuArray[J] = _psiGmu
+            _psiEmuArray[J] = _psiEmu       
+            print(np.sum(np.abs(_psiG)**2*dx*dy*dz))
+            print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
 
-# %%
-@njit(fastmath=True, nogil=True)
-def G(_psiG, _psiE, _psiGmu):
-    """Function of ground state"""
-    tmp = np.zeros(_psiG.shape)
-    tmp =  ( 0.5 * del2(_psiG,dx,dy,dz) 
-         - (Epot + Ggg*np.abs(_psiG)**2 + Gge*np.abs(_psiE)**2)*_psiG
-         + _psiGmu*_psiG )
-    # set boundary points to zero
-    tmp[0,:,:] = tmp[-1,:,:] = tmp[:,-1,:] = tmp[:,0,:] =  tmp[:,:,0] = tmp[:,:,-1] = 0
-    return tmp
-    
-@njit(fastmath=True, nogil=True)
-def E(_psiG, _psiE, _psiEmu):
-    """Function of excited state"""
-    tmp = np.zeros(_psiE.shape)
-    tmp = ( 0.5 * del2(_psiE,dx,dy,dz) 
-         - (Epot + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2)*_psiE
-         + _psiEmu*_psiE )
-    # set boundary points to zero
-    tmp[0,:,:] =  tmp[-1,:,:] = tmp[:,-1,:] = tmp[:,0,:] =  tmp[:,:,0] = tmp[:,:,-1] = 0
-    return tmp
+        _psiG_n = dw * (0.5 * del2(_psiG,dx,dy,dz ) - (Epot + Ggg*np.abs(_psiG)**2 + Gge*np.abs(_psiE)**2) * _psiG \
+                      - np.conjugate(LG)*_psiE + _psiGmu*_psiG) \
+                + _psiG 
+        _psiE = dw * (0.5 * del2(_psiE,dx,dy,dz) - (Epot + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2) * _psiE \
+                      - LG*_psiG  + _psiEmu*_psiE)  \
+                + _psiE
+                
+        _psiG = _psiG_n
 
-@njit(fastmath=True, nogil=True)
-def RK4(_psiG, _psiE, _psiGmu, _psiEmu, h):
-    k_g = np.zeros((*_psiG.shape,4))
-    k_e = np.zeros((*_psiG.shape,4))
-    k_g[...,0] = G(_psiG, _psiE, _psiGmu) 
-    k_e[...,0] = E(_psiG, _psiE, _psiEmu) 
-    k_g[...,1] = G(_psiG + h*k_g[...,1]/2, _psiE + h*k_e[...,1]/2, _psiGmu) 
-    k_e[...,1] = E(_psiG + h*k_g[...,1]/2, _psiE + h*k_e[...,1]/2, _psiEmu) 
-    k_g[...,2] = G(_psiG + h*k_g[...,2]/2, _psiE + h*k_e[...,2]/2, _psiGmu) 
-    k_e[...,2] = E(_psiG + h*k_g[...,2]/2, _psiE + h*k_e[...,2]/2, _psiEmu) 
-    k_g[...,3] = G(_psiG + h*k_g[...,3], _psiE + h*k_e[...,3], _psiGmu) 
-    k_e[...,3] = E(_psiG + h*k_g[...,3], _psiE + h*k_e[...,3], _psiEmu) 
-    _psiG = _psiG + h/6 * ( k_g[...,0] + 2*k_g[...,1] + 2*k_g[...,2] + k_g[...,3] )
-    _psiE = _psiE + h/6 * ( k_e[...,0] + 2*k_e[...,1] + 2*k_e[...,2] + k_e[...,3] )
+    return _psiG, _psiE, _psiGmuArray, _psiEmuArray
 
-    return _psiG, _psiE
+# %% 
+@njit(fastmath=True, nogil=True)
+def Hamiltonian(_psi, _G, _dx, _dy, _dz):
+    Energy = (np.sum( (np.conjugate(_psi) *  
+        (-0.5 *del2(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
+
+    return Energy
+
+
 
 @njit(fastmath=True, nogil=True)
 def del2(w, _dx, _dy, _dz):
@@ -237,15 +214,14 @@ def Normalize(_psiG,_psiE,_dx,_dy,_dz):
 
 # %%
 import matplotlib.pyplot as plt
-nj = 200000
-stepJ = 2000
-psiGmuArray = np.zeros(100)
-psiEmuArray = np.zeros(100)
-
+nj = 100000
+stepJ = 5000
+psiGmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
+psiEmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
+psiGmuArray[0] = psiGmu
+psiEmuArray[0] = psiEmu
 psiG = np.array(n_TF_pbb+0.1,dtype=np.cfloat)
 psiE = np.zeros_like(n_TF_pbb,dtype=np.cfloat)
-# psiG = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
-# psiE = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
 # %%
 print("abs|n_TF_pbb|^2")
 print(np.sum(np.abs(n_TF_pbb)**2*dx*dy*dz))
@@ -305,7 +281,8 @@ plt.xlabel("x")
 plt.title("LG")
 print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
 #%%
-psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler(Epot, psiG, psiE,LG,nj)
+psiG, psiE, psiGmuArray, psiEmuArray  = compute_BEC_Euler_UpdateMu(
+    psiG, psiE, psiGmuArray, psiEmuArray, nj, stepJ)
 
 # %%
 """=============Below are plotting code for quick reference=============="""
@@ -585,4 +562,4 @@ fig.update_layout(title='LG_phase', autosize=False,
                   margin=dict(l=65, r=50, b=65, t=90))
 fig.show()
 
-# %%
+psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler(Epot, psiG, psiE,LG,nj)
