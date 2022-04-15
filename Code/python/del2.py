@@ -3,6 +3,7 @@
 #     np.array([[[ dim 3 ], ... dim 2 ... ]], ... dim 1 ... , [ ... ]]])
 # In the memory order, index of last dimension change first.
 
+from numba import njit
 from scipy.ndimage import laplace
 import numpy as np
 import time
@@ -13,12 +14,22 @@ def timeit(fun,dx,dy,dz):
     vectorized(fun,dx,dy,dz)
     print("\n---hand-written in %s seconds ---\n" % (time.time() - start_time1))
 
-
+@njit(fastmath=True, nogil=True)
+def del2(w, _dx, _dy, _dz):
+    """ Calculate the del2 of the array w=[].
+        Note that the boundary points aren't handled """
+    lap = np.zeros_like(w)
+    for z in range(1,w.shape[2]-1):
+        lap[:, :, z] = (1/_dz)**2 * ( w[:, :, z+1] - 2*w[:, :, z] + w[:, :, z-1] )
+    for y in range(1,w.shape[0]-1):
+        lap[y, :,:] = lap[y, :, :] + (1/_dy)**2 * ( w[y+1, :, :] - 2*w[y, :, :] + w[y-1, :, :] )
+    for x in range(1,w.shape[1]-1):
+        lap[:, x,:] = lap[:, x, :] + (1/_dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
+    return lap
 
 def vectorized(F, dx, dy, dz):
     """Calculating discrete laplacian
     
-    # TODO: order of accuracy.
     
     Arg:
         F: Function to be calculated. Assume F is 
@@ -159,7 +170,6 @@ def vectorized(F, dx, dy, dz):
     rightdown = ((1/dx**2)*(-5*F[0,-1-1,cutz] + 4*F[0,-1-2,cutz] - F[0,-1-3,cutz] + 2*F[0,-1,cutz]) 
         + (1/dy**2)*(-5*F[1,0,cutz] + 4*F[2,0,cutz] - F[3,0,cutz] + 2*F[0,0,cutz]))
 
-    # TODO: equivalent to np.block??
     bd_points = np.array([[leftdown, rightdown],[leftup, rightup]]).reshape(2,2,2)
     bd_p_arg1 = (1/dz**2)*(-5*F[cuty,cutx,1] + 4*F[cuty,cutx,2] - F[cuty,cutx,3] + 2*F[cuty,cutx,0])
     bd_p_arg2 = (1/dz**2)*(-5*F[cuty,cutx,-1-1] + 4*F[cuty,cutx,-1-2] - F[cuty,cutx,-1-3] + 2*F[cuty,cutx,-1])

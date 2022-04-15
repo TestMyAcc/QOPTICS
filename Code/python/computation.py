@@ -97,10 +97,10 @@ def compute_BEC_Euler(_psiG, _psiE, nj):
     for j in range(nj):
         
         
-        _psiG_n = dw * (0.5 * del2(_psiG,dx,dy,dz ) - (Epot + Ggg*np.abs(_psiG)**2 + Gge*np.abs(_psiE)**2) * _psiG \
+        _psiG_n = dw * (0.5 * laplacian(_psiG,dx,dy,dz ) - (Epot + Ggg*np.abs(_psiG)**2 + Gge*np.abs(_psiE)**2) * _psiG \
                       - np.conjugate(LG)*_psiE + _psiGmu*_psiG) \
                 + _psiG 
-        _psiE = dw * (0.5 * del2(_psiE,dx,dy,dz) - (Epot + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2) * _psiE \
+        _psiE = dw * (0.5 * laplacian(_psiE,dx,dy,dz) - (Epot + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2) * _psiE \
                       - LG*_psiG  + _psiEmu*_psiE)  \
                 + _psiE
                 
@@ -111,84 +111,23 @@ def compute_BEC_Euler(_psiG, _psiE, nj):
             print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
     return _psiG, _psiE
 
-# %%
-@njit(fastmath=True, nogil=True)
-def compute_BEC_Euler_UpdateMu(
-    _psiG:np.ndarray, _psiE:np.ndarray, 
-    _psiGmuArray:np.ndarray, _psiEmuArray:np.ndarray,
-    nj:int, stepJ:int):
-    """Calculating interaction between the BEC and L.G. beams.
-    Two-order system is used. The code evaluates ground-
-    state BEC and excited-state BEC, and save the data.
-    Note: Data is calculated without units. Use Euler method
-    to update time.
-   
-    Args:
-        nj: Number of iterations.
-        stepJ: Number of iterations to update energy constraint.
-        isLight: interaction with light?.
-        x,y,z: coordinate vectors
-        dw: finite time difference.
-    """
-
-    _psiG_n = np.zeros_like(_psiG)    
-    J = 0
-    _psiGmu = _psiGmuArray[J]
-    _psiEmu = _psiEmuArray[J]
-
-
-    for j in range(nj):
-        
-        if (j % stepJ) == 0 and j != 0:
-        #  update energy constraint 
-            Nfactor = Normalize(_psiG,_psiE,dx,dy,dz)
-            _psiGmu = _psiGmu/(Nfactor)
-            _psiEmu = _psiEmu/(Nfactor)
-            J = J + 1
-            _psiGmuArray[J] = _psiGmu
-            _psiEmuArray[J] = _psiEmu       
-            print(np.sum(np.abs(_psiG)**2*dx*dy*dz))
-            print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
-
-        _psiG_n = dw * (0.5 * del2(_psiG,dx,dy,dz ) - (Epot + Ggg*np.abs(_psiG)**2 + Gge*np.abs(_psiE)**2) * _psiG \
-                      - np.conjugate(LG)*_psiE + _psiGmu*_psiG) \
-                + _psiG 
-        _psiE = dw * (0.5 * del2(_psiE,dx,dy,dz) - (Epot + Gee*np.abs(_psiE)**2 + Geg*np.abs(_psiG)**2) * _psiE \
-                      - LG*_psiG  + _psiEmu*_psiE)  \
-                + _psiE
-                
-        _psiG = _psiG_n
-
-    return _psiG, _psiE, _psiGmuArray, _psiEmuArray
 
 # %% 
 @njit(fastmath=True, nogil=True)
 def Hamiltonian(_psi, _G, _dx, _dy, _dz):
     Energy = (np.sum( (np.conjugate(_psi) *  
-        (-0.5 *del2(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
+        (-0.5 *laplacian(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
 
     return Energy
 
 
 
 @njit(fastmath=True, nogil=True)
-def del2(w, _dx, _dy, _dz):
-    """ Calculate the del2 of the array w=[].
-        Note that the boundary points aren't handled """
-    lap = np.zeros_like(w)
-    for z in range(1,w.shape[2]-1):
-        lap[:, :, z] = (1/_dz)**2 * ( w[:, :, z+1] - 2*w[:, :, z] + w[:, :, z-1] )
-    for y in range(1,w.shape[0]-1):
-        lap[y, :,:] = lap[y, :, :] + (1/_dy)**2 * ( w[y+1, :, :] - 2*w[y, :, :] + w[y-1, :, :] )
-    for x in range(1,w.shape[1]-1):
-        lap[:, x,:] = lap[:, x, :] + (1/_dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
-    return lap
-
-# @njit(fastmath=True, nogil=True)
 def laplacian(w, dx, dy, dz):
     Ny,Nx,Nz=w.shape
-    # u=np.zeros_like(w)
-    w[1:Ny-1,1:Nx-1,1:Nz-1] = (
+    # boundary is zero
+    u=np.zeros_like(w)
+    u[1:Ny-1,1:Nx-1,1:Nz-1] = (
         (1/dx**2)*(
                 w[2:Ny,   1:Nx-1, 1:Nz-1] 
             - 2*w[1:Ny-1, 1:Nx-1, 1:Nz-1] 
@@ -201,7 +140,7 @@ def laplacian(w, dx, dy, dz):
                 w[1:Ny-1, 1:Nx-1, 2:Nz]
             - 2*w[1:Ny-1, 1:Nx-1, 1:Nz-1] 
             + w[1:Ny-1, 1:Nx-1, 0:Nz-2]))
-    return w
+    return u
 
 
 # %%
@@ -281,8 +220,7 @@ plt.xlabel("x")
 plt.title("LG")
 print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
 #%%
-
-psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler_UpdateMu(psiG, psiE,psiGmuArray,psiEmuArray,nj,stepJ)
+psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler(psiG, psiE,nj)
 # %%
 
 # save data
@@ -313,6 +251,7 @@ else:
         f['Parameters/As'] = As
         f['Parameters/Nbec'] = Nbec
         f['Parameters/Rabi'] = Rabi
+        f['Parameters/m'] = m
         f['Parameters/Wx'] = Wx
         f['Parameters/Wy'] = Wy
         f['Parameters/Wz'] = Wz

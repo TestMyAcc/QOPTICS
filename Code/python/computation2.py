@@ -77,19 +77,7 @@ else:
 # %%
 
 def compute_BEC_Euler(Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.ndarray, nj:int):
-    """Calculating interaction between the BEC and L.G. beams.
-    Two-order system is used. The code evaluates ground-
-    state BEC and excited-state BEC, and save the data.
-    Note: Data is calculated without units. Use Euler method
-    to update time.
-   
-    Args:
-        nj: Number of iterations.
-        stepJ: Number of iterations to update energy constraint.
-        isLight: interaction with light?.
-        x,y,z: coordinate vectors
-        dw: finite time difference.
-    """
+
 
     _psiG = cp.array(psiG, dtype=cp.complex128)
     _psiG_n = cp.zeros_like(_psiG)
@@ -159,20 +147,7 @@ def compute_BEC_Euler_UpdateMu(
     Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.ndarray,
     psiGmuArray:np.ndarray, psiEmuArray:np.ndarray,
     nj:int, stepJ:int):
-    """Calculating interaction between the BEC and L.G. beams.
-    Two-order system is used. The code evaluates ground-
-    state BEC and excited-state BEC, and save the data.
-    Note: Data is calculated without units. Use Euler method
-    to update time.
-   
-    Args:
-        nj: Number of iterations.
-        stepJ: Number of iterations to update energy constraint.
-        isLight: interaction with light?.
-        x,y,z: coordinate vectors
-        dw: finite time difference.
-    """
-
+    
     _psiG = cp.array(psiG, dtype=cp.complex128)
     _psiG_n = cp.zeros_like(_psiG)    
     _psiE = cp.array(psiE,dtype=cp.complex128)
@@ -186,7 +161,7 @@ def compute_BEC_Euler_UpdateMu(
     _LG = cp.array(LG, dtype=cp.complex128)
     _Epot = cp.array(Epot, dtype=cp.complex128)
     
-    _Lap = cp.zeros_like(psiG)
+    _Lap = cp.zeros_like(psiG)   #boundaries are zero
     
     
     for j in range(nj):
@@ -359,6 +334,7 @@ else:
         f['Parameters/As'] = As
         f['Parameters/Nbec'] = Nbec
         f['Parameters/Rabi'] = Rabi
+        f['Parameters/m'] = m
         f['Parameters/Wx'] = Wx
         f['Parameters/Wy'] = Wy
         f['Parameters/Wz'] = Wz

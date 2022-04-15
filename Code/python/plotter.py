@@ -41,7 +41,6 @@ def plotter2(fig,x, data1, data2):
 
 
 
-
 def get_demo_image():
     z = cbook.get_sample_data("axes_grid/bivariate_normal.npy", np_load=True)
     # z is a numpy array of 15x15
@@ -102,6 +101,7 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         As = f['Parameters/As'][()]
         Nbec = f['Parameters/Nbec'][()] 
         Rabi = f['Parameters/Rabi'][()]
+        m = f['Parameters/m'][()]
         Wx = f['Parameters/Wx'][()]
         Wy = f['Parameters/Wy'][()]
         Wz = f['Parameters/Wz'][()]

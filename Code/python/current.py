@@ -2,7 +2,7 @@ from numpy import pi
 from numpy import gradient
 from numpy import conjugate
     
-def current(data,dx: float,dy,dz,m):
+def current(data, dx, dy, dz, m):
     """Calculating probability density current
 
     Args:
