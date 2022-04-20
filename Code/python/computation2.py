@@ -43,19 +43,21 @@ Gge = 0
 Geg = 0
 Epot = ( (Wx**2*grid_x**2 + Wy**2*grid_y**2 + Wz**2*grid_z**2 )
             / (2*Wz**2) )
-# circular potential
+
+
 psiGmu = (15*Ggg / ( 16*pi*np.sqrt(2) )  )**(2/5)  
 psiEmu = (15*Gee / ( 16*pi*np.sqrt(2) )  )**(2/5) 
 
-# psiGmu = (16*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
+# psiGmu = (15*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
 # %%
 TF_amp = np.array((psiGmu-Epot)/Ggg,dtype=np.cfloat)
 np.clip(TF_amp, 0, np.inf,out=TF_amp)
 TF_pbb = np.sqrt(TF_amp)
 total = np.sum(np.abs(TF_pbb)**2*dx*dy*dz)
 n_TF_pbb = TF_pbb/np.sqrt(total)
-# Laguerre-Gaussian laser
+
 #%%
+# Laguerre-Gaussian laser
 lgpath = input("Specify filename\n"+dirutils.listLG()[1])
 lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath) + '.h5'
 if (os.path.exists(lgpath)):
@@ -91,7 +93,7 @@ def compute_BEC_Euler(Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.n
     _Lap = cp.zeros_like(psiG)
     
     
-    for j in range(nj):
+    for _ in range(nj):
         _Lap[1:Ny-1,1:Nx-1,1:Nz-1] = (
                 (0.5/dx**2)*(
                         _psiG[2:Ny,   1:Nx-1, 1:Nz-1] 
@@ -130,15 +132,8 @@ def compute_BEC_Euler(Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.n
         _psiG = _psiG_n
         
         
-        if (j % stepJ) == 0:
-        #  update energy constraint 
-            Nfactor = Normalize(_psiG,_psiE,dx,dy,dz)
-            _psiGmu = _psiGmu/(Nfactor)
-            _psiEmu = _psiEmu/(Nfactor)   
-            
-    
         
-    return _psiG.get(), _psiE.get(), _psiGmu.get(), _psiEmu.get()
+    return _psiG.get(), _psiE.get()
 
 
 # %%
@@ -152,8 +147,8 @@ def compute_BEC_Euler_UpdateMu(
     _psiG_n = cp.zeros_like(_psiG)    
     _psiE = cp.array(psiE,dtype=cp.complex128)
     
-    _psiGmuArray  = cp.array(psiGmuArray, dtype=cp.float32)
-    _psiEmuArray  = cp.array(psiEmuArray, dtype=cp.float32)
+    _psiGmuArray = cp.array(psiGmuArray, dtype=cp.float32)
+    _psiEmuArray = cp.array(psiEmuArray, dtype=cp.float32)
     J = 0
     _psiGmu = _psiGmuArray[J]
     _psiEmu = _psiEmuArray[J]
@@ -223,17 +218,13 @@ def Normalize(_psiG:cp.ndarray,_psiE:cp.ndarray,_dx,_dy,_dz):
     return Nfactor
 
 
-# def Hamiltonian(_psi, _G, _dx, _dy, _dz):
-#     Energy = (np.sum( (np.conjugate(_psi) *  
-#         (-0.5 *del2(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
 
-#     return Energy
 
 
 # %%
 import matplotlib.pyplot as plt
-nj = 100000
-stepJ = 5000
+nj = 1000000
+stepJ = 50000
 psiGmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
 psiEmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
 psiGmuArray[0] = psiGmu
@@ -299,7 +290,7 @@ plt.figure()
 plt.plot(x, np.abs(LGdata[61,:,61])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("LG")
-# print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
+print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
 #%%
 psiG, psiE, psiGmuArray, psiEmuArray = compute_BEC_Euler_UpdateMu(
     Epot,psiG, psiE,LG,psiGmuArray, psiEmuArray,
@@ -323,6 +314,8 @@ else:
     with h5py.File(path, "w") as f:
         f['psiG'] = psiG
         f['psiE'] = psiE
+        f['psiGmuArray'] = psiGmuArray
+        f['psiEmuArray'] = psiEmuArray
         f['LGfile'] = lgpath
         f['Metaparameters/Nx'] = Nx
         f['Metaparameters/Ny'] = Ny
@@ -353,3 +346,5 @@ else:
 
 
 
+
+# %%

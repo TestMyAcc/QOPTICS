@@ -43,11 +43,11 @@ Gge = 0
 Geg = 0
 Epot = ( (Wx**2*grid_x**2 + Wy**2*grid_y**2 + Wz**2*grid_z**2 )
             / (2*Wz**2) )
-# circular potential
+
 psiGmu = (15*Ggg / ( 16*pi*np.sqrt(2) )  )**(2/5)  
 psiEmu = (15*Gee / ( 16*pi*np.sqrt(2) )  )**(2/5) 
 
-# psiGmu = (16*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
+# psiGmu = (15*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
 # %%
 TF_amp = np.array((psiGmu-Epot)/Ggg,dtype=np.cfloat)
 np.clip(TF_amp, 0, np.inf,out=TF_amp)
@@ -55,8 +55,8 @@ TF_pbb = np.sqrt(TF_amp)
 total = np.sum(np.abs(TF_pbb)**2*dx*dy*dz)
 n_TF_pbb = TF_pbb/np.sqrt(total)
 
-# Laguerre-Gaussian laser
 #%%
+# Laguerre-Gaussian laser
 lgpath = input("Specify filename\n"+dirutils.listLG()[1])
 lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath) + '.h5'
 if (os.path.exists(lgpath)):
@@ -110,15 +110,6 @@ def compute_BEC_Euler(_psiG, _psiE, nj):
             print(np.sum(np.abs(_psiG)**2*dx*dy*dz))
             print(np.sum(np.abs(_psiE)**2*dx*dy*dz))
     return _psiG, _psiE
-
-
-# %% 
-@njit(fastmath=True, nogil=True)
-def Hamiltonian(_psi, _G, _dx, _dy, _dz):
-    Energy = (np.sum( (np.conjugate(_psi) *  
-        (-0.5 *laplacian(_psi,dx,dy,dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*dx*dy*dz)))
-
-    return Energy
 
 
 

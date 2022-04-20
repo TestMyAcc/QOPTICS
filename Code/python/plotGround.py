@@ -3,6 +3,14 @@
 import h5py
 import numpy as np
 import dirutils,os
+import del2
+
+def Hamiltonian(_psi, _G, _dx, _dy, _dz):
+     Energy = (np.sum( (np.conjugate(_psi) *  
+         (-0.5 *del2.del2(_psi,_dx,_dy,_dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*_dx*_dy*_dz)))
+
+     return Energy
+
 
 base_dir = os.path.join(os.path.expanduser("~"),"Data")
 filenames = dirutils.lsfiles(base_dir) 
@@ -13,8 +21,10 @@ if not os.path.isfile(path):
 
 #%%
 with h5py.File(path, "r") as f:
-    psiG = f['psiG'][()]
-    psiE = f['psiE'][()]
+    psiG = f['psiG'][...]
+    psiE = f['psiE'][...]
+    psiGmuArray = f['psiGmuArray'][...]
+    psiEmuArray = f['psiEmuArray'][...]
     Nx = f['Metaparameters/Nx'][()]
     Ny = f['Metaparameters/Ny'][()]
     Nz = f['Metaparameters/Nz'][()]

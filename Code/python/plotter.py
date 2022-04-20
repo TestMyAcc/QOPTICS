@@ -163,21 +163,21 @@ def plotdata(filepath:str, nslice:int, plotwhat='intensity'):
         
         labels = [None]*3
         Data = np.zeros((*psiG.shape,3),dtype=np.cfloat)
-        Data[...,0] = psiG
+        Data[...,0] = LG 
         Data[...,1] = psiE
-        Data[...,2] = LG
+        Data[...,2] = psiG 
         Profile = np.zeros_like(Data, dtype=float)
         
         if (plotwhat == 'intensity'):
-            Profile[...,0:2] = np.abs(Data[...,0:2])**2*dx*dy*dz #wavefunction
-            Profile[...,-1] = np.abs(Data[...,-1])**2 #Light amplitude
-            labels[0:2] = ["|psiG|^2*dx*dy*dz", "|psiE|^2*dx*dy*dz"]
-            labels[-1] =  "|LG|^2"
+            Profile[...,1:] = np.abs(Data[...,1:])**2*dx*dy*dz #wavefunction
+            Profile[...,0] = np.abs(Data[...,0])**2 #Light amplitude
+            labels[0] =  "|LG|^2"
+            labels[1:] = ["|psiE|^2*dx*dy*dz", "|psiG|^2*dx*dy*dz"]
 
         if (plotwhat == 'phase'):
             Profile[...] = np.arctan2(np.imag(Data[...]),np.real(Data[...]))
-            labels[0:2] = ["phase of psiG", "phase of psiE"]
-            labels[-1] =  "phase of LG"
+            labels[0] =  "phase of LG"
+            labels[1:] = ["phase of psiE", "phase of psiG"]
             
 
         add_slice(axs[0], z[zindice])

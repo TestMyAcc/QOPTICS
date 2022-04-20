@@ -27,6 +27,7 @@ def del2(w, _dx, _dy, _dz):
         lap[:, x,:] = lap[:, x, :] + (1/_dx)**2 * ( w[:, x+1, :] - 2*w[:, x, :] + w[:, x-1, :] )
     return lap
 
+
 def vectorized(F, dx, dy, dz):
     """Calculating discrete laplacian
     
