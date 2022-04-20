@@ -6,7 +6,7 @@ import dirutils,os
 # %%
 # retrieve local h5py files
 base,filenames = dirutils.listLG() 
-filename = input(f"Choose a filename from below:\n{filenames}")
+filename = input(f"Choose a filename from below:\n{filenames}") + '.h5'
 path = os.path.join(base, filename)
 
 with h5py.File(path, "r") as f:

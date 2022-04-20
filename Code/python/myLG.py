@@ -1,5 +1,5 @@
 #%%
-from numba import njit
+
 import numpy as np
 from matplotlib import pyplot as plt
 from numpy.polynomial import laguerre
@@ -69,7 +69,7 @@ def main():
     x = np.linspace(-Lx,Lx,Nx)
     y = np.linspace(-Ly,Ly,Ny)
     z = np.linspace(-Lz,Lz,Nz)
-    L = 0
+    L = 1
     P = 0
     W0 = 3.5
     Lambda = 1
