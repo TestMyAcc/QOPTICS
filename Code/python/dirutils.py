@@ -39,6 +39,13 @@ def listLG() -> tuple[str,str]:
     lgfilenames =  list(filter(r.match, filelist))
     return base, '\n'.join(lgfilenames)
 
+def listBEC():
+    base = os.path.expanduser("~/Data/")
+    filelist = files(base)
+    r = re.compile('^BEC\S*.h5')
+    lgfilenames =  list(filter(r.match, filelist))
+    return base, '\n'.join(lgfilenames)
+
 if __name__ == "__main__":
     # checkdir(r"C:\Users\Lab\Desktop\PlayGround\dir\subdir\subsubdir")
     # print(lsfiles(r"C:\Users\Lab\Desktop\PlayGround"))

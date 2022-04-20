@@ -58,10 +58,10 @@ n_TF_pbb = TF_pbb/np.sqrt(total)
 
 #%%
 # Laguerre-Gaussian laser
-lgpath = input("Specify filename\n"+dirutils.listLG()[1])
-lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath) + '.h5'
-if (os.path.exists(lgpath)):
-    with h5py.File(lgpath, "r") as f:
+lgfilename = input("Specify filename\n"+dirutils.listLG()[1])
+lgpath = os.path.join("~/Data/", lgfilename) + '.h5'
+if (os.path.exists(os.path.expanduser(lgpath))):
+    with h5py.File(os.path.expanduser(lgpath), "r") as f:
         LGdata = f['LGdata'][...]
         W0 = f['Parameters/W0']
         Lambda = f['Parameters/Lambda']
@@ -222,18 +222,18 @@ def Normalize(_psiG:cp.ndarray,_psiE:cp.ndarray,_dx,_dy,_dz):
 
 
 # %%
-import matplotlib.pyplot as plt
-nj = 1000000
-stepJ = 50000
+nj = 100000
+stepJ = 5000
 psiGmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
 psiEmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
 psiGmuArray[0] = psiGmu
 psiEmuArray[0] = psiEmu
-psiG = np.array(n_TF_pbb+0.1,dtype=np.cfloat)
+psiG = np.array(n_TF_pbb*2,dtype=np.cfloat)
 psiE = np.zeros_like(n_TF_pbb,dtype=np.cfloat)
 # psiG = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
 # psiE = np.array(np.ones(TF_pbb.shape)+5,dtype=np.cfloat)
 # %%
+import matplotlib.pyplot as plt
 print("abs|n_TF_pbb|^2")
 print(np.sum(np.abs(n_TF_pbb)**2*dx*dy*dz))
 print("abs|psiG|^2")
@@ -243,48 +243,32 @@ print(np.sum(np.abs(psiE)**2*dx*dy*dz))
 #%%
 plt.figure()
 plt.plot(x, np.abs(n_TF_pbb[61,:,61])**2*dx*dy*dz)
-plt.xlabel("x")
-plt.title("n_TF_pbb")
-
-plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
-plt.xlabel("y")
-plt.title("n_TF_pbb")
-
-plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
-plt.xlabel("z")
-plt.title("n_TF_pbb")
-
-plt.figure()
 plt.plot(x, np.abs(psiG[61,:,61])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("psiG")
+plt.legend(["Thomas-Fermi", "psiG"])
 
 plt.figure()
+plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
 plt.plot(y, np.abs(psiG[:,61,61]**2)*dx*dy*dz)
 plt.xlabel("y")
-plt.title("psiG")
 
 plt.figure()
+plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
 plt.plot(z, np.abs(psiG[61,61,:]**2)*dx*dy*dz)
 plt.xlabel("z")
-plt.title("psiG")
 
 plt.figure()
 plt.plot(x, np.abs(psiE[61,:,61])**2*dx*dy*dz)
 plt.xlabel("x")
-plt.title("psiE")
 
 plt.figure()
 plt.plot(y, np.abs(psiE[:,61,61]**2)*dx*dy*dz)
 plt.xlabel("y")
-plt.title("psiE")
 
 plt.figure()
 plt.plot(z, np.abs(psiE[61,61,:]**2)*dx*dy*dz)
 plt.xlabel("z")
-plt.title("psiE")
 
 plt.figure()
 plt.plot(x, np.abs(LGdata[61,:,61])**2*dx*dy*dz)
@@ -337,13 +321,6 @@ else:
         f['Parameters/Gge'] = Gge
         f['Parameters/Geg'] = Geg
         print("storing succeeded!")
-
-
-
-
-
-
-
 
 
 

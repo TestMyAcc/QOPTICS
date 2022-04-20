@@ -57,10 +57,10 @@ n_TF_pbb = TF_pbb/np.sqrt(total)
 
 #%%
 # Laguerre-Gaussian laser
-lgpath = input("Specify filename\n"+dirutils.listLG()[1])
-lgpath = os.path.join(os.path.expanduser("~/Data/"),lgpath) + '.h5'
-if (os.path.exists(lgpath)):
-    with h5py.File(lgpath, "r") as f:
+lgfilename = input("Specify filename\n"+dirutils.listLG()[1])
+lgpath = os.path.join("~/Data/", lgfilename) + '.h5'
+if (os.path.exists(os.path.expanduser(lgpath))):
+    with h5py.File(os.path.expanduser(lgpath), "r") as f:
         LGdata = f['LGdata'][...]
         W0 = f['Parameters/W0']
         Lambda = f['Parameters/Lambda']
@@ -71,6 +71,7 @@ else:
     print(f"\n{lgpath} doesn't exits!\nset LG = 0, lgpath to ''\n")
     LG = 0
     lgpath=''
+
 
 
 # %%

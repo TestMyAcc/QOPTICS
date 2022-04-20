@@ -69,7 +69,7 @@ def main():
     x = np.linspace(-Lx,Lx,Nx)
     y = np.linspace(-Ly,Ly,Ny)
     z = np.linspace(-Lz,Lz,Nz)
-    L = 1
+    L = 10
     P = 0
     W0 = 3.5
     Lambda = 1
