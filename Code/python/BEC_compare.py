@@ -1,3 +1,4 @@
+# quick plotting
 #%%
 #  retrieve BEC in h5py
 import h5py
@@ -88,7 +89,7 @@ else:
     print(f"\n{lgpath} doesn't exits!\nset LG = 0, lgpath to ''\n")
     LG = 0
     lgpath=''   
-# psiGmu = (16*Ggg/(64*np.sqrt(2)*np.pi))**(2/5) # for oval potential
+
 # %%
 TF_amp = np.array((psiGmu-Epot)/Ggg,dtype=np.cfloat)
 np.clip(TF_amp, 0, np.inf,out=TF_amp)
@@ -177,20 +178,20 @@ import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import numpy as np
 cut = 60
-cut2 = 41
-density = np.abs(psiE)**2*dx*dy*dz
+cut2 = 51
+density = np.abs(psiG)**2*dx*dy*dz
 fig, axs =plt.subplots(1,2)
 cont = axs[0].pcolor(X[..., cut],Y[..., cut], density[...,cut])
 axs[0].set_xlabel('x')
 axs[0].set_ylabel('y')
 axs[0].axhline(y=y[cut2],color='r',linestyle='-')
 plt.colorbar(cont, ax=axs[0])
-axs[0].set_title("density of psiE at z=0")
+axs[0].set_title("density of psiG at z=0")
 
 axs[1].plot(x,density[cut2,:,cut])
 axs[1].set_xlabel('x')
 axs[1].set_ylabel('density')
-axs[1].set_title("density of psiE at redline")
+axs[1].set_title(f"density of psiG at y={y[cut2]}")
 # %% intensity
 import plotly.graph_objects as go
 fig = go.Figure(data=[go.Surface(x=x,y=y,z=np.abs(psiG[:,:,cut]**2*dx*dy*dz))])

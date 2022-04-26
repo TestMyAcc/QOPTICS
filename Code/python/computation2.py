@@ -222,7 +222,7 @@ def Normalize(_psiG:cp.ndarray,_psiE:cp.ndarray,_dx,_dy,_dz):
 
 
 # %%
-nj = 100000
+nj = 300000
 stepJ = 5000
 psiGmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
 psiEmuArray = np.zeros(int(nj/stepJ),dtype=np.float32)
@@ -242,36 +242,36 @@ print("abs|psiE|^2")
 print(np.sum(np.abs(psiE)**2*dx*dy*dz))
 #%%
 plt.figure()
-plt.plot(x, np.abs(n_TF_pbb[61,:,61])**2*dx*dy*dz)
-plt.plot(x, np.abs(psiG[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(n_TF_pbb[60,:,60])**2*dx*dy*dz)
+plt.plot(x, np.abs(psiG[60,:,60])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("psiG")
 plt.legend(["Thomas-Fermi", "psiG"])
 
 plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
-plt.plot(y, np.abs(psiG[:,61,61]**2)*dx*dy*dz)
+plt.plot(y, np.abs(n_TF_pbb[:,60,60]**2)*dx*dy*dz)
+plt.plot(y, np.abs(psiG[:,60,60]**2)*dx*dy*dz)
 plt.xlabel("y")
 
 plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
-plt.plot(z, np.abs(psiG[61,61,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(n_TF_pbb[60,60,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(psiG[60,60,:]**2)*dx*dy*dz)
 plt.xlabel("z")
 
 plt.figure()
-plt.plot(x, np.abs(psiE[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(psiE[60,:,60])**2*dx*dy*dz)
 plt.xlabel("x")
 
 plt.figure()
-plt.plot(y, np.abs(psiE[:,61,61]**2)*dx*dy*dz)
+plt.plot(y, np.abs(psiE[:,60,60]**2)*dx*dy*dz)
 plt.xlabel("y")
 
 plt.figure()
-plt.plot(z, np.abs(psiE[61,61,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(psiE[60,60,:]**2)*dx*dy*dz)
 plt.xlabel("z")
 
 plt.figure()
-plt.plot(x, np.abs(LGdata[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(LGdata[60,:,60])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("LG")
 print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))

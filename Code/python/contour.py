@@ -1,3 +1,4 @@
+# example code of isosurface plot.
 #%%
 
 import plotly.graph_objects as go

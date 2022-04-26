@@ -1,7 +1,5 @@
-# 3D numpy array example:
-# memory representation:
-#     np.array([[[ dim 3 ], ... dim 2 ... ]], ... dim 1 ... , [ ... ]]])
-# In the memory order, index of last dimension change first.
+# hand-written centre difference of laplacian
+# the boudary condition is wrong.
 
 from numba import njit
 from scipy.ndimage import laplace

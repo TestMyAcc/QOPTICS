@@ -1,3 +1,5 @@
+# RK4 to iterate time in Hamiltonian. Not test yet
+# (may not be used)
 from numba import njit
 # %%
 @njit(fastmath=True, nogil=True)
