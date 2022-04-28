@@ -6,13 +6,15 @@ function scanning(spatialProfile,plotwhat,direction,varargin)
 % 
 %   SCANNING(spatialProfile,plotwhat,direction)
 %   spatialProfile is a 1x1 structure array of the data 
-%   key: value pairs
+%   key: value pairs (in order)
 %   {
-%   x: x cooridnate, y: y cooridnate , z: z cooridnate, 
-%   psiG | psiE | LG: data in 3D arrays
-%   plotwhat: properties to be plotted
-%   direction: direction to be scanned
+%       x: x cooridnate, a row vector, 
+%       y: y cooridnate, a row vector, 
+%       z: z cooridnate, a row vector, 
+%       psiG  or psiE or LG:, 3D arrays
 %   }
+%   plotwhat: current or phase or density
+%   direction: x or y or z
 % 
 %   SCANNING(spatialProfile,plotwhat,direction,*OPTIONAL)
 %   OPTIONAL: name-value pairs of plotting parameters
@@ -41,8 +43,8 @@ dataType = fieldnames(spatialProfile);
 whichdata = dataType{end};
 
 defaultQuiversize = 3;
-defaultInter = 3;
-defaultMargin = 40 ;
+defaultInter = 1;
+defaultMargin = 0 ;
 defaultColor = 'blue' ;
 defaultMode = 'auto' ;
 defaultLength =  'notgiven';                                    %User must provide length. 
@@ -57,7 +59,6 @@ if strcmp(whichdata, 'LG')
     addOptional(p,'Length', defaultLength);
     
 end
-
 if any(strcmp(whichdata, {'psiG','psiE'}))
     addOptional(p,'Mass', defaultMass);
 end
@@ -67,7 +68,6 @@ addParameter(p,'Inter', defaultInter, @isscalar);
 addParameter(p,'Quiversize', defaultQuiversize, @isscalar);
 addParameter(p,'Color', defaultColor, @ischar);
 addParameter(p,'Cmode', defaultMode, @ischar);
-
 
 parse(p, spatialProfile, plotwhat, direction, varargin{:});
 
