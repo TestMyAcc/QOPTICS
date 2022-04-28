@@ -1,6 +1,6 @@
 #%%
 # If Running in jupyter interactively would lead to suspend"
-__import__("matplotlib").use("Qt5Agg")  # or use %matplotlib widget in ipython
+# __import__("matplotlib").use("TkAgg")  # or use %matplotlib widget in ipython
 import numpy as np
 from matplotlib import pyplot as plt
 import h5py
@@ -9,52 +9,6 @@ from matplotlib import cbook
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import current as cur
 # import oam
-
-
-def plotter1(fig,X,Y,cut, data1, data2):
-    """Compare Cross-sections of two data subplots"""
-    ax = fig.add_subplot(1, 2, 1, projection='3d')
-    surf = ax.plot_surface(X[:,:,cut],Y[:,:,cut],data1[:,:,cut])
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    ax.set_title("Data 1")
-    # ax.set_zlim(np.max(data1[:,:,cut])+1,np.min(data1[:,:,cut])-1)
-    
-    ax1 = fig.add_subplot(1, 2, 2, projection='3d')
-    ax1.plot_surface(X[:,:,cut],Y[:,:,cut],data2[:,:,cut])
-    ax1.set_xlabel('x')
-    ax1.set_ylabel('y')
-    ax1.set_zlabel('z')
-    ax1.set_title("Data 2")
-    # ax1.set_zlim(np.max(data1[:,:,cut])+1,np.min(data1[:,:,cut])-1)
-    plt.show()
-    
-    return ax,ax1
-
-
-def plotter2(fig,x, data1, data2):
-    """Compare two data(array) int the same plot"""
-    fig, ax = plt.subplots()
-    ax.plot(x, data1, 'go', linewidth=2.0)
-    ax.plot(x, data2, linewidth=2.0)
-    plt.show()
-    return ax
-
-
-
-def get_demo_image():
-    z = cbook.get_sample_data("axes_grid/bivariate_normal.npy", np_load=True)
-    # z is a numpy array of 15x15
-    return z, (-3, 4, -4, 3)
-
-
-def get_test_data():
-    x = np.arange(-5,6) 
-    y = np.arange(-5,6) 
-    xx,yy = np.meshgrid(x,y)
-    zz = np.random.random(xx.shape)
-    return xx,yy,zz
 
 
 def add_cb(fig):
@@ -68,14 +22,26 @@ def add_cb(fig):
         ax_cb.yaxis.set_tick_params(labelright=True)
 
 
+def add_label(axs, coord, labels):
+    for k, ax_r in enumerate(axs):
+        ax_r[0].set_ylabel(labels[k])
+        if not (hasattr(ax_r, '__iter__')):
+            z = np.round(coord,3)
+            ax_r.set_title(f"z={z}")
+        else:
+            for m, ax in enumerate(ax_r):
+                z = np.round(coord[m],3)
+                ax.set_title(f"z={z}")
+            
+def add_contour(axs, profile, X, Y, zindice):
+    for k,axs_row in enumerate(axs):
+        plotted = profile[...,k]
+        for i, ax in enumerate(axs_row):
+            ax.pcolor(X[..., zindice[i]],Y[..., zindice[i]], plotted[...,zindice[i]])
+    add_cb(axs[0,0].get_figure())
 
-def add_slice(ax_r, coord):
-    for k, ax in enumerate(ax_r):
-        z = np.round(coord[k],3)
-        ax.set_title(f"z={z}")
 
-
-def plotting(axs,z, zindice, X, Y, Data, dx,dy,dz, plotwhat,**kwargs):
+def plotting(axs,z, zindice, X, Y, Data, dx,dy,dz, plotwhat):
     labels = [None]*3
     profile = np.zeros_like(Data, dtype=float)
     if (plotwhat == 'intensity'):
@@ -89,30 +55,38 @@ def plotting(axs,z, zindice, X, Y, Data, dx,dy,dz, plotwhat,**kwargs):
         labels[0] =  "phase of LG"
         labels[1:] = ["phase of psiE", "phase of psiG"]
 
-    add_slice(axs[0], z[zindice])
-
-    for k,axs_row in enumerate(axs):
-        axs_row[0].set_ylabel(labels[k])
-        plotted = profile[...,k]
-        for i, ax in enumerate(axs_row):
-            ax.pcolor(X[..., zindice[i]],Y[..., zindice[i]], plotted[...,zindice[i]], **kwargs)
+    add_label(axs, z[zindice], labels)
+    add_contour(axs, profile, X, Y, zindice)
 
 
-def plotarrow(axs,z,zindice,X,Y,dx,dy,dz,m,length,data,**kwargs):
+def plotarrow(axs,zindice,X,Y,dx,dy,dz,m,length,data,**quiverargs):
     # probability density current and linear momentum of light
     # TODO: fix current
     Jx = Jy = Jz = np.zeros_like(data[...,1],dtype=np.complex128)
+    s = quiverargs.pop('step',1) #default to 1, no lost arrow
+
+    idx = np.arange(0,X.shape[1],s)
+    idy = np.arange(0,Y.shape[0],s)
+    kernel = np.ix_(idx,idy)
+    X = X[kernel]
+    Y = Y[kernel]
+
     for k,axs_row in enumerate(axs):
         if (k==1 or k==2):
             Jx,Jy,Jz = cur.current(data[...,k],dx,dy,dz,m)
         else:
             pass  #TODO: fix oam
+       
+        # reduce the density of arrow on axes
+        Jx = Jx[kernel]
+        Jy = Jy[kernel]
+
         for i, ax in enumerate(axs_row):
             ax.quiver(X[..., zindice[i]], Y[..., zindice[i]], 
-                      np.real(Jx[..., zindice[i]]), np.real(Jy[..., zindice[i]]),  
-                      angles='xy',units='width', scale_units='width', **kwargs)
+                    np.real(Jx[..., zindice[i]]), np.real(Jy[..., zindice[i]]),  
+                    **quiverargs)
 
-def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**kwargs):
+def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**quiverargs):
     """Plotting the data, like comparison.m
     :filepath: path to data in h5py
     :plotwhat: 'intensity' or 'phase'
@@ -198,14 +172,14 @@ def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**kwargs)
         Data[...,1] = psiE
         Data[...,2] = psiG 
 
-        plotting(axs,z,zindice, X,Y,Data,dx,dy,dz,plotwhat, **kwargs)
-        add_cb(fig)
+        if not (plotwhat == 'none'):
+            plotting(axs,z,zindice, X,Y,Data,dx,dy,dz,plotwhat)
         if (current):
-            plotarrow(axs,z,zindice,X,Y, dx,dy,dz,m,Lambda, Data,**kwargs)
+            plotarrow(axs,zindice,X,Y, dx,dy,dz,m,Lambda, Data,**quiverargs)
         
         
-        plt.show()          # interactive backend
-        plt.close()
+        # plt.show()          # interactive backend
+        # plt.close()
 
 
 
@@ -213,8 +187,18 @@ def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**kwargs)
 if (__name__ == '__main__'):
 
     base_dir, text  = dirutils.listBEC()
+    print(text)
     filename = input("The filename:" + '\n' + text)
     path = os.path.join(base_dir,filename) + '.h5'
-    
-    plotdata(path,6, plotwhat='intensity',current=False)
-# %%
+    plotdata(path,2, plotwhat='none',current=True,
+            angles='xy',
+            units='x',
+            step = 5,
+            scale_units='x',
+            # scale=1e-1,
+            # headwidth=2,
+            # headlength=6,
+            # headaxislength=3,
+            # width=0.1
+            )
+
