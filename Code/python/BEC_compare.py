@@ -42,6 +42,7 @@ with h5py.File(path, "r") as f:
     Gee = f['Parameters/Gee'][()]
     Gge = f['Parameters/Gge'][()]
     Geg = f['Parameters/Geg'][()]
+    m = f['Parameters/m'][()]
     lgpath = f['LGfile'][()]
     print("retrieving succeeded!")
 
@@ -244,7 +245,7 @@ with h5py.File(path, "r") as f:
 
 
 #%%
-print('\nisosurface\n')
+# print('\nisosurface\n')
 # import plotly.graph_objects as go
 # Data = np.abs(psiE**2*dx*dy*dz).flatten()
 # # [X,Y,Z] = np.meshgrid(x,y,z)

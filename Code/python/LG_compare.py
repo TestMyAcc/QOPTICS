@@ -7,6 +7,7 @@ import dirutils,os
 # %%
 # retrieve local h5py files
 base,filenames = dirutils.listLG() 
+print(filenames)
 filename = input(f"Choose a filename from below:\n{filenames}") + '.h5'
 path = os.path.join(base, filename)
 
@@ -20,15 +21,15 @@ with h5py.File(path, "r") as f:
     dx = np.diff(x)[0]
     dy = np.diff(y)[0]
     dz = np.diff(z)[0]
-    
 
 
 #%% LG cross-line along xy-plane
 from matplotlib import pyplot as plt
 
-cut = 61
+cut = 60
 plt.figure()
-plt.plot(x, np.abs(LGdata[61,:,cut])**2*dx*dy*dz)
+plt.plot(x, np.abs(LGdata[60,:,cut])**2*dx*dy*dz)
+plt.pcolor(np.abs(LGdata[:,:,cut]))
 
 #%% LG intensity from python
 cut = 61

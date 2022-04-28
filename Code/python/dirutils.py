@@ -15,6 +15,7 @@ def files(dir:str) -> list:
     dir = os.path.expanduser(dir)
     filelist = [ f for f in os.listdir(dir) if 
     os.path.isfile(os.path.join(dir, f))]
+    filelist = [x.strip('.pngjpgh5') for x in filelist]
     return filelist
 
 def lsfiles(dir:str) -> str:
@@ -35,21 +36,21 @@ def listLG() -> tuple[str,str]:
     """    return all the names of LG files below ~/Data/"""
     base = os.path.expanduser("~/Data/")
     filelist = files(base)
-    r = re.compile('^LG\S*.h5')
+    r = re.compile('^LG\S*')
     lgfilenames =  list(filter(r.match, filelist))
     return base, '\n'.join(lgfilenames)
 
 def listBEC():
     base = os.path.expanduser("~/Data/")
     filelist = files(base)
-    r = re.compile('^BEC\S*.h5')
+    r = re.compile('^BEC\S*')
     lgfilenames =  list(filter(r.match, filelist))
     return base, '\n'.join(lgfilenames)
 
 if __name__ == "__main__":
     # checkdir(r"C:\Users\Lab\Desktop\PlayGround\dir\subdir\subsubdir")
-    # print(lsfiles(r"C:\Users\Lab\Desktop\PlayGround"))
+    # print(files(r'c:\\Users\\Lab\\Data'))
     # print(lsallfiles(r"C:\Users\Lab\Desktop\PlayGround"))
-    # print(lsallfiles(r"C:\Users\Lab\Desktop\PlayGround"))
-    print(listLG())
+    b,fn = listLG()
+    print(fn)
 # %%

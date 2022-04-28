@@ -16,8 +16,8 @@ def current(data, dx, dy, dz, m):
 
     hbar = 6.62607004e-34/(2*pi)
     
-    [VxData,VyData,VzData] = gradient(data,dx,dy,dz)
-    [VxData_C,VyData_C,VzData_C] = gradient(conjugate(data),dx,dy,dz)
+    [VyData,VxData,VzData] = gradient(data,dy,dx,dz)
+    [VyData_C,VxData_C,VzData_C] = gradient(conjugate(data),dy,dx,dz)
 
     Jx = (hbar/(2j*m))*(conjugate(data)*VxData - data*VxData_C) 
     Jy = (hbar/(2j*m))*(conjugate(data)*VyData - data*VyData_C)

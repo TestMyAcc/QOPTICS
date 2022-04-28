@@ -8,7 +8,8 @@ import os,dirutils
 from matplotlib import cbook
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import current as cur
-# import oam
+import oam
+import scipy.io
 
 
 def add_cb(fig):
@@ -54,14 +55,12 @@ def plotting(axs,z, zindice, X, Y, Data, dx,dy,dz, plotwhat):
         profile[...] = np.arctan2(np.imag(Data[...]),np.real(Data[...]))
         labels[0] =  "phase of LG"
         labels[1:] = ["phase of psiE", "phase of psiG"]
-
-    add_label(axs, z[zindice], labels)
     add_contour(axs, profile, X, Y, zindice)
+    return labels
 
 
 def plotarrow(axs,zindice,X,Y,dx,dy,dz,m,length,data,**quiverargs):
     # probability density current and linear momentum of light
-    # TODO: fix current
     Jx = Jy = Jz = np.zeros_like(data[...,1],dtype=np.complex128)
     s = quiverargs.pop('step',1) #default to 1, no lost arrow
 
@@ -75,7 +74,7 @@ def plotarrow(axs,zindice,X,Y,dx,dy,dz,m,length,data,**quiverargs):
         if (k==1 or k==2):
             Jx,Jy,Jz = cur.current(data[...,k],dx,dy,dz,m)
         else:
-            pass  #TODO: fix oam
+            Jx,Jy,Jz = oam.oam(data[...,k],dx,dy,dz,length)        
        
         # reduce the density of arrow on axes
         Jx = Jx[kernel]
@@ -85,6 +84,10 @@ def plotarrow(axs,zindice,X,Y,dx,dy,dz,m,length,data,**quiverargs):
             ax.quiver(X[..., zindice[i]], Y[..., zindice[i]], 
                     np.real(Jx[..., zindice[i]]), np.real(Jy[..., zindice[i]]),  
                     **quiverargs)
+    labels = [None]*3
+    labels[0] =  "O.A.M of L.G"
+    labels[1:] = ["P.D.C of psiE", "P.D.C of psiG"]
+    return labels
 
 def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**quiverargs):
     """Plotting the data, like comparison.m
@@ -123,7 +126,7 @@ def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**quivera
             with h5py.File(lgpath, "r") as f:
                 LGdata = f['LGdata'][...]
                 # W0 = f['Parameters/W0']
-                Lambda = f['Parameters/Lambda']
+                Lambda = f['Parameters/Lambda'][()]
                 Rabi = Rabi/Wz                                                                               
                 LG = 0.5*Rabi*LGdata
                 print(f"\nReading LGdata : {lgpath}\n")
@@ -168,17 +171,24 @@ def plotdata(filepath:str, nslice:int, plotwhat='phase', current=False,**quivera
         fig.suptitle("PsiG, psiE, LG beam comparison")
 
         Data = np.zeros((*psiG.shape,3),dtype=np.cfloat)
+        # mat = scipy.io.loadmat(r'C:\Users\Lab\Documents\121_121_121W01_Lambda1_L&P10.mat')
+        # Data[...,0] = mat['LG']
+        # print(r"reading C:\Users\Lab\Documents\121_121_121W01_Lambda1_L&P10.mat")
         Data[...,0] = LG 
         Data[...,1] = psiE
         Data[...,2] = psiG 
 
         if not (plotwhat == 'none'):
-            plotting(axs,z,zindice, X,Y,Data,dx,dy,dz,plotwhat)
+            labels = plotting(axs,z,zindice, X,Y,Data,dx,dy,dz,plotwhat)
+            add_label(axs, z[zindice], labels)
+            
         if (current):
-            plotarrow(axs,zindice,X,Y, dx,dy,dz,m,Lambda, Data,**quiverargs)
+            labels = plotarrow(axs,zindice,X,Y, dx,dy,dz,m,Lambda, Data,**quiverargs)
+            if (plotwhat == 'none'):
+                add_label(axs, z[zindice], labels)
+            
         
-        
-        # plt.show()          # interactive backend
+        plt.show()          # interactive backend
         # plt.close()
 
 
@@ -190,15 +200,18 @@ if (__name__ == '__main__'):
     print(text)
     filename = input("The filename:" + '\n' + text)
     path = os.path.join(base_dir,filename) + '.h5'
-    plotdata(path,2, plotwhat='none',current=True,
+    plotdata(path,4, plotwhat='none',current=True,
             angles='xy',
             units='x',
             step = 5,
             scale_units='x',
-            # scale=1e-1,
+            # scale=0.001,
             # headwidth=2,
             # headlength=6,
             # headaxislength=3,
             # width=0.1
             )
 
+
+
+# %%
