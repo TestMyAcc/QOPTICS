@@ -95,11 +95,11 @@ def compute_BEC_Euler(Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.n
     
     for _ in range(nj):
         _Lap[1:Ny-1,1:Nx-1,1:Nz-1] = (
-                (0.5/dx**2)*(
+                (0.5/dy**2)*(
                         _psiG[2:Ny,   1:Nx-1, 1:Nz-1] 
                     - 2*_psiG[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiG[0:Ny-2, 1:Nx-1, 1:Nz-1])
-                +(0.5/dy**2)*(
+                +(0.5/dx**2)*(
                         _psiG[1:Ny-1, 2:Nx,   1:Nz-1] 
                     - 2*_psiG[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiG[1:Ny-1, 0:Nx-2, 1:Nz-1])
@@ -113,11 +113,11 @@ def compute_BEC_Euler(Epot:np.ndarray, psiG:np.ndarray, psiE:np.ndarray, LG:np.n
         
 
         _Lap[1:Ny-1,1:Nx-1,1:Nz-1] = (
-                (0.5/dx**2)*(
+                (0.5/dy**2)*(
                         _psiE[2:Ny,   1:Nx-1, 1:Nz-1] 
                     - 2*_psiE[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiE[0:Ny-2, 1:Nx-1, 1:Nz-1])
-                +(0.5/dy**2)*(
+                +(0.5/dx**2)*(
                         _psiE[1:Ny-1, 2:Nx,   1:Nz-1] 
                     - 2*_psiE[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiE[1:Ny-1, 0:Nx-2, 1:Nz-1])
@@ -172,11 +172,11 @@ def compute_BEC_Euler_UpdateMu(
             
             
         _Lap[1:Ny-1,1:Nx-1,1:Nz-1] = (
-                (0.5/dx**2)*(
+                (0.5/dy**2)*(
                         _psiG[2:Ny,   1:Nx-1, 1:Nz-1] 
                     - 2*_psiG[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiG[0:Ny-2, 1:Nx-1, 1:Nz-1])
-                +(0.5/dy**2)*(
+                +(0.5/dx**2)*(
                         _psiG[1:Ny-1, 2:Nx,   1:Nz-1] 
                     - 2*_psiG[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiG[1:Ny-1, 0:Nx-2, 1:Nz-1])
@@ -190,11 +190,11 @@ def compute_BEC_Euler_UpdateMu(
         
 
         _Lap[1:Ny-1,1:Nx-1,1:Nz-1] = (
-                (0.5/dx**2)*(
+                (0.5/dy**2)*(
                         _psiE[2:Ny,   1:Nx-1, 1:Nz-1] 
                     - 2*_psiE[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiE[0:Ny-2, 1:Nx-1, 1:Nz-1])
-                +(0.5/dy**2)*(
+                +(0.5/dx**2)*(
                         _psiE[1:Ny-1, 2:Nx,   1:Nz-1] 
                     - 2*_psiE[1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + _psiE[1:Ny-1, 0:Nx-2, 1:Nz-1])

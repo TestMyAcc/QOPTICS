@@ -120,11 +120,11 @@ def laplacian(w, dx, dy, dz):
     # boundary is zero
     u=np.zeros_like(w)
     u[1:Ny-1,1:Nx-1,1:Nz-1] = (
-        (1/dx**2)*(
+        (1/dy**2)*(
                 w[2:Ny,   1:Nx-1, 1:Nz-1] 
             - 2*w[1:Ny-1, 1:Nx-1, 1:Nz-1] 
             + w[0:Ny-2, 1:Nx-1, 1:Nz-1])
-        +(1/dy**2)*(
+        +(1/dx**2)*(
                 w[1:Ny-1, 2:Nx,   1:Nz-1] 
             - 2*w[1:Ny-1, 1:Nx-1, 1:Nz-1] 
             + w[1:Ny-1, 0:Nx-2, 1:Nz-1])
@@ -214,7 +214,6 @@ print("\n Total runs {} steps , update every {} steps\n".format(nj, stepJ))
 #%%
 psiG, psiE, psiGmu, psiEmu = compute_BEC_Euler(psiG, psiE,nj)
 # %%
-
 # save data
 import h5py
 import os
@@ -253,3 +252,6 @@ else:
         f['Parameters/Gge'] = Gge
         f['Parameters/Geg'] = Geg
         print("storing succeeded!")
+
+
+# %%

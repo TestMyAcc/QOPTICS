@@ -25,7 +25,7 @@ while ishandle(hf_advec) && t <= 1e-11
     
     if j> length(y0/2)
         % moving x-axis
-        x(1) = []; x = [x x(length(x)) + dx];
+    x(1) = []; x = [x x(length(x)) + dx];
         y(i-1) = y(i);y(length(y)) = 0;
     end
     y = advection1D(y,dx,dt,c,j,y0);

@@ -3,7 +3,7 @@ clc,clear
 % OutputVideo();
 %=paremeters=%
 dx = 0.1; dy = dx; dz = 0.1;
-dw = 0.01*dx^2;  % µê¼Æ®É¶¡  % dw < dx^2 3order  
+dw = 0.01*dx^2;  % ï¿½ï¿½Æ®É¶ï¿½  % dw < dx^2 3order  
 Lxy = 20; Lz = 6;
 x = -Lxy:dx:Lxy; y = x;   z = -Lz:dz:Lz; 
 Nx = 2*Lxy/dx +1; Ny = Nx; Nz = 2*Lz/dz +1; 
@@ -29,7 +29,7 @@ G = sum(P_rho*dx*dy*dz,'all');   % Interaction constant
 
 
 
-%=ªñ¦ü¸Ñ=%
+%=ï¿½ï¿½ï¿½ï¿½ï¿½=%
 solution = (E - EU)/G;
 minusIndex = (solution < 0);
 solution(minusIndex) = 0;  
@@ -42,8 +42,8 @@ solution(minusIndex) = 0;
 
 %%
 %=Create matrix=%
-%¤èµ{°Ê¯à¶µªºÂ÷´²³¡¥÷¨M©w¬Otridiagonal matrix
-M = gallery('tridiag',Nx,1,-2,1);   %gallery ¥s¥Xªº¬Osparce matrix
+%ï¿½ï¿½{ï¿½Ê¯à¶µï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Mï¿½wï¿½Otridiagonal matrix
+M = gallery('tridiag',Nx,1,-2,1);   %gallery ï¿½sï¿½Xï¿½ï¿½ï¿½Osparce matrix
 M(1,1) = -1; M(end,end) = -1; 
 M1 = dw/(2*dx.^2)*M; M2 = dw/(2*dy.^2)*M; M3 = dw/(2*dz.^2)*M;
 
@@ -57,7 +57,7 @@ tdata = zeros(1,1000);
 while j < 10000
  
     if ~1
-%         surface(X,Y,psi.^2,'EdgeColor','none'); %¤£·|¨ê·s
+%         surface(X,Y,psi.^2,'EdgeColor','none'); %ï¿½ï¿½ï¿½|ï¿½ï¿½s
         subplot(1,2,1)
         plot3(XX,YY,psi.^2,'*','MarkerSize',0.05);
         hold on

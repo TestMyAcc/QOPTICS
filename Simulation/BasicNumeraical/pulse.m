@@ -44,7 +44,7 @@ end
 
 function [newY] = advection1D(oldY,dx,dt,c)
 % backward difference 
-% i starts from 2(matlab §â«e­±¤¸¯À¸É0)
+% i starts from 2(matlab ï¿½ï¿½eï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0)
     n = length(oldY);
     i = 2:n-1;
     newY(i) = oldY(i) - (dt/dx)*c*(oldY(i)-oldY(i-1));      
