@@ -4,13 +4,13 @@
 import h5py
 import numpy as np
 import dirutils,os
-import del2
 
-def Hamiltonian(_psi, _G, _dx, _dy, _dz):
-     Energy = (np.sum( (np.conjugate(_psi) *  
-         (-0.5 *del2.del2(_psi,_dx,_dy,_dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*_dx*_dy*_dz)))
 
-     return Energy
+# def Hamiltonian(_psi, _G, _dx, _dy, _dz):
+#      Energy = (np.sum( (np.conjugate(_psi) *  
+#          (-0.5 *del2.del2(_psi,_dx,_dy,_dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*_dx*_dy*_dz)))
+
+#      return Energy
 
 
  
