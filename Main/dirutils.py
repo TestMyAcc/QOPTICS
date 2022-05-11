@@ -36,14 +36,21 @@ def listLG() -> tuple[str,str]:
     """    return all the names of LG files below ~/Data/"""
     base = os.path.expanduser("~/Data/")
     filelist = files(base)
-    r = re.compile('^LG\S*')
+    r = re.compile('^LG*')
     lgfilenames =  list(filter(r.match, filelist))
     return base, '\n'.join(lgfilenames)
 
-def listBEC():
+def listBEC() -> tuple[str,str]:
     base = os.path.expanduser("~/Data/")
     filelist = files(base)
     r = re.compile('^BEC\S*')
+    lgfilenames =  list(filter(r.match, filelist))
+    return base, '\n'.join(lgfilenames)
+
+def listscanresults() -> tuple[str,str]:
+    base = os.path.expanduser("~/Data/")
+    filelist = files(base)
+    r = re.compile('^scan\S*')
     lgfilenames =  list(filter(r.match, filelist))
     return base, '\n'.join(lgfilenames)
 
@@ -51,6 +58,5 @@ if __name__ == "__main__":
     # checkdir(r"C:\Users\Lab\Desktop\PlayGround\dir\subdir\subsubdir")
     # print(files(r'c:\\Users\\Lab\\Data'))
     # print(lsallfiles(r"C:\Users\Lab\Desktop\PlayGround"))
-    b,fn = listLG()
-    print(fn)
-# %%
+    # print(listLG()[1])
+    print(listscanresults()[1])
