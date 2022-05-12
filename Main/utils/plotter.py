@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #%%
 # If Running in jupyter interactively would lead to suspend"
 # __import__("matplotlib").use("TkAgg")  # or use %matplotlib widget in ipython
@@ -205,7 +204,6 @@ if (__name__ == '__main__'):
             )
 
 # %%
-=======
 #%%
 # If Running in jupyter interactively would lead to suspend"
 # __import__("matplotlib").use("TkAgg")  # or use %matplotlib widget in ipython
@@ -409,11 +407,6 @@ if (__name__ == '__main__'):
             headlength=6,
             headaxislength=3,
             # width=0.1
-<<<<<<< HEAD
             )
 
 # %%
->>>>>>> f20cfc5 (progress(test): test and profile the performance)
-=======
-            )
->>>>>>> e575fc9 (progress(workflow): improve workflow)

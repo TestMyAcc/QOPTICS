@@ -75,7 +75,7 @@ def _walk(obj, data):
             _walk(obj, data)
         else: data[obj_name] = obj[()]
 
-def retrieve(datadir=r"~/Data", flag=0):
+def retrieve(datadir=r"~/Data",flag=0):
     """Calculating discrete laplacian
     Arg:
         datadir: the directory where data are stored
@@ -90,9 +90,9 @@ def retrieve(datadir=r"~/Data", flag=0):
     if flag:
         path = datadir
     else: 
+        filenames = ls_data()[1]
         print(filenames,end='\n')
         filename = input(f"Choose a filename from below:\n{filenames}")
-        filenames = ls_data()[1]
         if not (filename):
             return 
         path = _os.path.join(datadir, filename) + '.h5'
