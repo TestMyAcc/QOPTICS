@@ -31,7 +31,7 @@ def myLG(X,Y,Z,_W0,_Lambda,_L,_P):
     Ny = Y.shape[0]
     Nz = Z.shape[2]
     
-    LGdata = np.zeros((Nx,Ny,Nz), dtype=np.cfloat)
+    LG = np.zeros((Nx,Ny,Nz), dtype=np.cfloat)
         
     R = np.sqrt(X**2 + Y**2)
     Phi = np.arctan2(Y,X)
@@ -41,15 +41,15 @@ def myLG(X,Y,Z,_W0,_Lambda,_L,_P):
     Ptrans1 = np.exp(-1j*(2*np.pi/_Lambda)*R**2/(2*Rz)) # Here
     Ptrans2 = np.exp(-1j*_L*Phi)
     PGuoy = np.exp(1j*Guoy)
-    LGdata = (_W0/W)*AL*ALpoly*AGauss*Ptrans1*Ptrans2*PGuoy
+    LG = (_W0/W)*AL*ALpoly*AGauss*Ptrans1*Ptrans2*PGuoy
 
     if (_L == 0 and _P == 0):
         Plong = np.exp(-1j*((2*np.pi/_Lambda)*Z - Guoy))
-        LGdata = (_W0/W)*AGauss*Ptrans1*Ptrans2*Plong
+        LG = (_W0/W)*AGauss*Ptrans1*Ptrans2*Plong
     
-    LGdata = 1*LGdata/np.max(np.abs(LGdata)) 
+    LG = 1*LG/np.max(np.abs(LG)) 
     
-    return LGdata
+    return LG
 #%%
 def main():
     import numpy as np
@@ -91,7 +91,7 @@ def main():
         n += 1
 
     with h5py.File(path, "w") as f:
-        f['LGdata'] = output
+        f['LG'] = output
         f['Coordinates/x'] = x
         f['Coordinates/y'] = y
         f['Coordinates/z'] = z

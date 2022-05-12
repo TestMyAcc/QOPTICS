@@ -19,7 +19,6 @@ def oam(data,dx,dy,dz,length):
     c = 299792458
     angFreq = 2*pi*c/length
     [gray,grax,graz] = gradient(data,dy,dx,dz)
-    # [grax_C,gray_C,graz_C] = gradient(conj(LGdata),dx,dy,dz)   # equivalent to below
     
     # TODO: the direction may be wrong.....
     Lx = 1j*angFreq*epsilon/2*(data*conjugate(grax) - conjugate(data)*grax) 

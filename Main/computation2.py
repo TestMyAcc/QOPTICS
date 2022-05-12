@@ -3,7 +3,7 @@
 import cupy as cp
 import numpy as np
 import h5py
-import dirutils,os
+import utils.dirutils,os
 
 # %%
 # Meta-parameters and parameters
@@ -58,7 +58,8 @@ n_TF_pbb = TF_pbb/np.sqrt(total)
 
 #%%
 # Laguerre-Gaussian laser
-lgfilename = input("Specify filename\n"+dirutils.listLG()[1])
+#FIXME: use dirutils.retreive(), if you want
+lgfilename = input("Specify filename\n"+utils.dirutils.listLG()[1])
 lgpath = os.path.join("~/Data/", lgfilename) + '.h5'
 if (os.path.exists(os.path.expanduser(lgpath))):
     with h5py.File(os.path.expanduser(lgpath), "r") as f:
@@ -285,7 +286,7 @@ psiG, psiE, psiGmuArray, psiEmuArray = compute_BEC_Euler_UpdateMu(
 import h5py
 import os
 import numpy as np
-import dirutils
+import utils.dirutils
 
 base_dir = os.path.join(os.path.expanduser("~"),"Data")
 msg = f"storing data below {base_dir}"
