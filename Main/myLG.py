@@ -4,10 +4,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 from numpy.polynomial import laguerre
 from scipy.special import genlaguerre
+import h5py
 
 #%%
 
-def myLG(X,Y,Z,_W0,_Lambda,_L,_P):
+def myLG(X,Y,Z,_W0,_Lambda,_L,_P,_path):
     """    myLG.py faster than myLG.m
 
     myLG.mat |68.680 sec| |121*121*121 points|
@@ -31,7 +32,7 @@ def myLG(X,Y,Z,_W0,_Lambda,_L,_P):
     Ny = Y.shape[0]
     Nz = Z.shape[2]
     
-    LG = np.zeros((Nx,Ny,Nz), dtype=np.cfloat)
+    LGdata = np.zeros((Nx,Ny,Nz), dtype=np.cfloat)
         
     R = np.sqrt(X**2 + Y**2)
     Phi = np.arctan2(Y,X)
@@ -41,15 +42,23 @@ def myLG(X,Y,Z,_W0,_Lambda,_L,_P):
     Ptrans1 = np.exp(-1j*(2*np.pi/_Lambda)*R**2/(2*Rz)) # Here
     Ptrans2 = np.exp(-1j*_L*Phi)
     PGuoy = np.exp(1j*Guoy)
-    LG = (_W0/W)*AL*ALpoly*AGauss*Ptrans1*Ptrans2*PGuoy
+    LGdata = (_W0/W)*AL*ALpoly*AGauss*Ptrans1*Ptrans2*PGuoy
 
     if (_L == 0 and _P == 0):
         Plong = np.exp(-1j*((2*np.pi/_Lambda)*Z - Guoy))
-        LG = (_W0/W)*AGauss*Ptrans1*Ptrans2*Plong
+        LGdata = (_W0/W)*AGauss*Ptrans1*Ptrans2*Plong
     
-    LG = 1*LG/np.max(np.abs(LG)) 
+    LGdata = 1*LGdata/np.max(np.abs(LGdata)) 
     
-    return LG
+    
+    with h5py.File(_path, "w") as f:
+        f['LGdata'] = LGdata
+        f['Parameters/W0'] = _W0
+        f['Parameters/Lambda'] = _Lambda
+        print(f"storing light as {_path}")
+        
+        
+    return LGdata
 #%%
 def main():
     import numpy as np
@@ -78,26 +87,7 @@ def main():
     [X,Y,Z] = np.meshgrid(x, y, z)
     output = myLG(X,Y,Z, _W0=W0,_Lambda=Lambda,_L=L,_P=P)
 
-    
-    base_dir = os.path.join(os.path.expanduser("~"),"Data")
-    print(f"storing data below {base_dir}")
-    filename = f'LG{L}{P}_{Nx}-{Ny}-{Nz}'
-    
-    path = os.path.join(base_dir, filename) + '.h5'
-    n = 1
-    while (os.path.exists(path)):
-        print(f"{path} already exists!")
-        path = os.path.join(base_dir, filename) + f'({n})' + '.h5'
-        n += 1
 
-    with h5py.File(path, "w") as f:
-        f['LG'] = output
-        f['Coordinates/x'] = x
-        f['Coordinates/y'] = y
-        f['Coordinates/z'] = z
-        f['Parameters/W0'] = W0
-        f['Parameters/Lambda'] = Lambda
-        print(f"storing light as {path}")
 #%%
 if __name__ == "__main__":
     main()    

@@ -147,6 +147,7 @@ def computation(param,nj,stepJ,filename,device=0):
                     f['Parameters/Geg'] = Geg.get()
                     # f['psiGmuArray'] = psiGmuArray
                     # f['psiEmuArray'] = psiEmuArray
+                    # f['L'] = ???
                     print("storing succeeded!")
                 
                 

@@ -15,7 +15,7 @@ data = dd.retrieve()
 module = sys.modules[__name__]
 for name, value in data.items():
     setattr(module, name, value)
-if 'LGdata' in globals(): # The light is stored as variable named 'LGdata'
+if 'LGdata' in data: # The light is stored as variable named 'LGdata'
     LG = LGdata
 #%%
 
@@ -113,6 +113,57 @@ plt.plot(x, np.abs(LG[61,:,61])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("LG")
 #
+
+# #%%
+# plt.figure()
+# plt.plot(x, np.abs(n_TF_pbb[60,:,61])**2*dx*dy*dz)
+# plt.xlabel("x")
+# plt.title("n_TF_pbb")
+
+# plt.figure()
+# plt.plot(y, np.abs(n_TF_pbb[:,60,61]**2)*dx*dy*dz)
+# plt.xlabel("y")
+# plt.title("n_TF_pbb")
+
+# plt.figure()
+# plt.plot(z, np.abs(n_TF_pbb[60,61,:]**2)*dx*dy*dz)
+# plt.xlabel("z")
+# plt.title("n_TF_pbb")
+
+# plt.figure()
+# plt.plot(x, np.abs(psiG[60,:,61])**2*dx*dy*dz)
+# plt.xlabel("x")
+# plt.title("psiG")
+
+# plt.figure()
+# plt.plot(y, np.abs(psiG[:,60,61]**2)*dx*dy*dz)
+# plt.xlabel("y")
+# plt.title("psiG")
+
+# plt.figure()
+# plt.plot(z, np.abs(psiG[60,61,:]**2)*dx*dy*dz)
+# plt.xlabel("z")
+# plt.title("psiG")
+
+# plt.figure()
+# plt.plot(x, np.abs(psiE[60,:,61])**2*dx*dy*dz)
+# plt.xlabel("x")
+# plt.title("psiE")
+
+# plt.figure()
+# plt.plot(y, np.abs(psiE[:,60,61]**2)*dx*dy*dz)
+# plt.xlabel("y")
+# plt.title("psiE")
+
+# plt.figure()
+# plt.plot(z, np.abs(psiE[60,61,:]**2)*dx*dy*dz)
+# plt.xlabel("z")
+# plt.title("psiE")
+
+# plt.figure()
+# plt.plot(x, np.abs(LGdata[60,:,61])**2*dx*dy*dz)
+# plt.xlabel("x")
+# plt.title("LG")
 
 
 # %%

@@ -101,10 +101,10 @@ def retrieve(datadir=r"~/Data",flag=0):
 
     try:
         with _h5py.File(path, "r") as f:
-            datas = {}
+            datas = {} # read BEC data
             _walk(f, datas)
             
-            if ('LGfile' in f):
+            if ('LGfile' in f): # if LG data is stored seperately
                 lgpath = _os.path.expanduser(f['LGfile'][()])
                 if (lgpath != ''):
                     with _h5py.File(lgpath, "r") as f_lg:
