@@ -6,3 +6,6 @@ Ggg = Gee  = 0
 psiG = psiE = LG = LGdata = 0
 m = 0
 Lambda = 0
+nj = 0
+Nbec = 0
+L = 0

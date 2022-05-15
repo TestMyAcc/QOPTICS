@@ -1,4 +1,5 @@
 #%%
+import logging
 import os as _os
 import re as _re
 import h5py as _h5py
@@ -69,58 +70,52 @@ def ls_data():
            
 
 
-def _walk(obj, data):
+def _walk(obj, data, sub):
     for obj_name, obj in obj.items():
         if (isinstance(obj, _h5py.Group)):        
-            _walk(obj, data)
-        else: data[obj_name] = obj[()]
+            _walk(obj, data, sub)
+        else:
+            if obj_name in sub:
+                data[sub[obj_name]] = obj[()]
+            else:
+                data[obj_name] = obj[()]
 
-def retrieve(datadir=r"~/Data",flag=0):
-    """Calculating discrete laplacian
+
+
+def retrieve(filename, sub:dict[str, str]={}):
+    """ Return the name-var pairs of h5py file.
     Arg:
-        datadir: the directory where data are stored
-    specify the datadir, and choose a file to load all
-        Default is "~/Data"
-        
-        flag: if flag is True, reading datadir directly.
+        filename: h5py file
+        sub: dict[varnames in h5 to be substituted, substituting strings] 
 
-    Return: dict[varnames: datasets(in hdf5)]
+    Return: dict[varnames, datasets(in hdf5)]
     """
-    datadir = _os.path.expanduser(datadir)
-    if flag:
-        path = datadir
-    else: 
-        filenames = ls_data()[1]
-        print(filenames,end='\n')
-        filename = input(f"Choose a filename from below:\n{filenames}")
-        if not (filename):
-            return 
-        path = _os.path.join(datadir, filename) + '.h5'
+
+    path = filename
+    datas = {} # read BEC data
     
+    with _h5py.File(path, "r") as f:
+        _walk(f, datas, sub)
+        
+        if ('LGfile' in f): # if LG data is stored seperately
+            lgpath = _os.path.expanduser(f['LGfile'][()])
+            if (lgpath != ''):
+                with _h5py.File(lgpath, "r") as f_lg:
+                    _walk(f_lg,datas,sub)
+                    print(f"\nReading LGdata : {lgpath}\n")
+        logging.info("Retrieve data success!\n")
+        
+    return datas
     
 
-    try:
-        with _h5py.File(path, "r") as f:
-            datas = {} # read BEC data
-            _walk(f, datas)
-            
-            if ('LGfile' in f): # if LG data is stored seperately
-                lgpath = _os.path.expanduser(f['LGfile'][()])
-                if (lgpath != ''):
-                    with _h5py.File(lgpath, "r") as f_lg:
-                        _walk(f_lg,datas)
-                        print(f"\nReading LGdata : {lgpath}\n")
-            print("Retrieve data success!\n")
-            
-            return datas
-    except FileNotFoundError as e:
-        print(e)
 
-
-
+#%%
 if __name__ == "__main__":
     # checkdir(r"C:\Users\Lab\Desktop\PlayGround\dir\subdir\subsubdir")
     # print(files(r'c:\\Users\\Lab\\Data'))
     # print(ls_allfiles(r"C:\Users\Lab\Data"))
     # print(ls_light()[1])
     print(ls_data()[1])
+
+
+# %%
