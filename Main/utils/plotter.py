@@ -97,9 +97,10 @@ def __plotarrow(axs,zindice,X,Y,dx,dy,dz,m,length,data,**quiverargs):
     labels[1:] = ["P.D.C of psiE", "P.D.C of psiG"]
     return labels
 
-def plotdata(path, nslice:int, plotwhat='phase', current=False,**quiverargs):
+def plotdata(path:str, zindice:int, lims:list[tuple], plotwhat:str='phase', current:bool=False,**quiverargs):
     """plotting the data, which is specified in the prompt
-    nslice: number of slices along z-axis
+    zindice: x-y planes on which z's ?
+    lims: [(xmin,xmax), (ymin,ymax)]
     plotwhat: 'intensity' or 'phase'
     rtype: none
     """
@@ -135,36 +136,34 @@ def plotdata(path, nslice:int, plotwhat='phase', current=False,**quiverargs):
     total = _np.sum(_np.abs(TF_pbb)**2*dx*dy*dz)
     n_TF_pbb = TF_pbb/_np.sqrt(total)
     
+    # retrieve n_TF_pbb non-zero part
+    region = _np.argwhere(n_TF_pbb[60,60,:] != 0) 
     
-    # compute the indexes of z-slices, must include center
-    middle = int(_np.floor(Nz/2))
-    firstnslice = int(_np.ceil(nslice/2))
-    secondnslice = int(_np.floor(nslice/2))
-    firsthalf = _np.linspace(1,middle, firstnslice, dtype=int) #exclude boundary
-    secondhalf = _np.linspace(middle+1,Nz-2, secondnslice, dtype=int) # exclude boundary
-    zindice = _np.append(firsthalf, secondhalf)
+    xmin = lims[0][0]
+    xmax = lims[0][1]
+    ymin = lims[1][0]
+    ymax = lims[1][1]
+    
+
     nrow = 3
-    dims = _np.zeros((nrow, nslice))
+    dims = _np.zeros((nrow, len(zindice)))
     w, h = _plt.figaspect(dims)*2 
-    fig, axs = _plt.subplots(nrow, nslice, figsize=(w, h),tight_layout=True)
+    fig, axs = _plt.subplots(nrow, len(zindice), figsize=(w, h),tight_layout=True)
     fig.suptitle("PsiG, psiE, LG beam comparison")
 
 
-    # retrieve n_TF_pbb non-zero part
-    region = _np.argwhere(n_TF_pbb[60,60,:] != 0) 
-    min = region[0][0] - 10
-    max = region[-1][0] + 10
-    Data = _np.zeros_like(psiG[min:max,min:max,:])
+    
+    Data = _np.zeros_like(psiG[ymin:ymax,xmin:xmax,:])
     Data = Data[...,_np.newaxis]
     Data = _np.repeat(Data,3,axis=3)
     
-    X = X[min:max, min:max, :]
-    Y = Y[min:max, min:max, :]
+    X = X[ymin:ymax, xmin:xmax, :]
+    Y = Y[ymin:ymax, xmin:xmax, :]
     
     
-    Data[...,0] = LG[min:max, min:max, :]
-    Data[...,1] = psiE[min:max,min:max, :]
-    Data[...,2] = psiG[min:max, min:max, :]
+    Data[...,0] = LG[ymin:ymax, xmin:xmax, :]
+    Data[...,1] = psiE[ymin:ymax,xmin:xmax, :]
+    Data[...,2] = psiG[ymin:ymax, xmin:xmax, :]
 
     if not (plotwhat == 'none'):
         labels = __plotting(axs,zindice, X,Y,Data,dx,dy,dz,plotwhat)
