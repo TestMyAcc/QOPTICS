@@ -1,5 +1,5 @@
 #%%
-import logging
+
 import os as _os
 import re as _re
 import h5py as _h5py
@@ -11,7 +11,7 @@ def checkdir(dirpath:str):
         _os.mkdir(dirpath)
         print(f"create new dir {dirpath}\n")
         
-def files(dir:str) -> list:
+def __files(dir:str) -> list:
     dir = _os.path.expanduser(dir)
     filelist = [ f for f in _os.listdir(dir) if 
     _os.path.isfile(_os.path.join(dir, f))]
@@ -22,7 +22,7 @@ def ls_files(dir):
     """
     return all the filepaths in dir in a string
     """
-    filenames = files(dir)
+    filenames = __files(dir)
     return '\n'.join(filenames)
 
 def ls_allfiles(dir):
@@ -36,38 +36,42 @@ def ls_allfiles(dir):
                     if _os.path.isdir(_os.path.join(dir, f))]  
     return filenames+'\n'+'\n'.join(allfilenames)
 
-def ls_light():
+def ls_light(dir):
     """
-    return all the names of LG files below ~/Data/
+    return all the datafile start with 'LG' in dir
     """
-    base = _os.path.expanduser("~/Data/")
-    filelist = files(base)
+    filelist = __files(dir)
     r = _re.compile('^LG*')
     lgfilenames =  list(filter(r.match, filelist))
-    return base, '\n'.join(lgfilenames)
+    return '\n'.join(lgfilenames)
 
-def ls_BEC():
+def ls_BEC(dir):
     """
-    return all the names of BEC files below ~/Data/
+    return all the datafile start with 'BEC' in dir
     """
-    base = _os.path.expanduser("~/Data/")
-    filelist = files(base)
+    
+    filelist = __files(dir)
     r = _re.compile('^BEC\S*')
     lgfilenames =  list(filter(r.match, filelist))
-    return base, '\n'.join(lgfilenames)
+    return '\n'.join(lgfilenames)
 
-def ls_data():
+def ls_data(dir:str):
     """
-    return all the names of data ~/Data/
+    return all the datafile in dir
     """
-    base = _os.path.expanduser("~/Data/")
-    filelist = files(base)
+    
+    filelist = __files(dir)
     r = _re.compile('^scan\S*')
     filenames =  list(filter(r.match, filelist))
-    return base, '\n'.join(filenames) + \
-           ls_BEC()[1] + ls_light()[1] + \
-            ': (Enter to return)\n'
-           
+    return '\n'.join(filenames) + \
+           ls_BEC(dir) + ls_light(dir)
+            
+def base():
+    """
+    return the data dir
+    """
+    
+    return _os.path.expanduser("~/Data/")
 
 
 def _walk(obj, data, sub):
@@ -103,19 +107,20 @@ def retrieve(filename, sub:dict[str, str]={}):
                 with _h5py.File(lgpath, "r") as f_lg:
                     _walk(f_lg,datas,sub)
                     print(f"\nReading LGdata : {lgpath}\n")
-        logging.info("Retrieve data success!\n")
+        
         
     return datas
+    
+# def wrapper():
     
 
 
 #%%
 if __name__ == "__main__":
-    # checkdir(r"C:\Users\Lab\Desktop\PlayGround\dir\subdir\subsubdir")
-    # print(files(r'c:\\Users\\Lab\\Data'))
-    # print(ls_allfiles(r"C:\Users\Lab\Data"))
-    # print(ls_light()[1])
-    print(ls_data()[1])
+    
+    based = base()
+    # print(ls_BEC(based))
+    print(ls_data(based+'/0516'))
 
 
 # %%

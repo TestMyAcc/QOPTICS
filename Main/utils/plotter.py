@@ -150,12 +150,21 @@ def plotdata(path, nslice:int, plotwhat='phase', current=False,**quiverargs):
     fig.suptitle("PsiG, psiE, LG beam comparison")
 
 
-    Data = _np.zeros((*psiG.shape,3),dtype=_np.cfloat)
-
-
-    Data[...,0] = LG 
-    Data[...,1] = psiE
-    Data[...,2] = psiG 
+    # retrieve n_TF_pbb non-zero part
+    region = _np.argwhere(n_TF_pbb[60,60,:] != 0) 
+    min = region[0][0] - 10
+    max = region[-1][0] + 10
+    Data = _np.zeros_like(psiG[min:max,min:max,:])
+    Data = Data[...,_np.newaxis]
+    Data = _np.repeat(Data,3,axis=3)
+    
+    X = X[min:max, min:max, :]
+    Y = Y[min:max, min:max, :]
+    
+    
+    Data[...,0] = LG[min:max, min:max, :]
+    Data[...,1] = psiE[min:max,min:max, :]
+    Data[...,2] = psiG[min:max, min:max, :]
 
     if not (plotwhat == 'none'):
         labels = __plotting(axs,zindice, X,Y,Data,dx,dy,dz,plotwhat)

@@ -11,7 +11,9 @@ from utils.dummyconst import *
 
 #      return Energy
 #%%
-data = dd.retrieve()
+path = "/home/quojinhao/Data/99999scan_param_L1_clusterGPU_stepResults.h5"
+data = dd.retrieve(path)
+
 module = sys.modules[__name__]
 for name, value in data.items():
     setattr(module, name, value)
@@ -59,10 +61,6 @@ TF_pbb = np.sqrt(TF_amp)
 total = np.sum(np.abs(TF_pbb)**2*dx*dy*dz)
 n_TF_pbb = TF_pbb/np.sqrt(total)
 
-#%%
-print(np.sum(np.abs(TF_pbb)**2*dx*dy*dz))
-print(np.sum(np.abs(psiG)**2*dx*dy*dz))
-print(np.sum(np.abs(psiE)**2*dx*dy*dz))
 
 #%%
 print("abs|n_TF_pbb|^2")
@@ -74,42 +72,43 @@ print(np.sum(np.abs(psiE)**2*dx*dy*dz))
 #%%
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
+cut =  60
 plt.figure()
-plt.plot(x, np.abs(n_TF_pbb[61,:,61])**2*dx*dy*dz)
-plt.plot(x, np.abs(psiG[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(n_TF_pbb[cut,:,cut])**2*dx*dy*dz)
+plt.plot(x, np.abs(psiG[cut,:,cut])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("psiG")
 plt.legend(["Thomas-Fermi", "psiG"])
 
 plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
-plt.plot(y, np.abs(psiG[:,61,61]**2)*dx*dy*dz)
+plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
+plt.plot(y, np.abs(psiG[:,cut,cut]**2)*dx*dy*dz)
 plt.xlabel("y")
 
 plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
-plt.plot(z, np.abs(psiG[61,61,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(psiG[cut,cut,:]**2)*dx*dy*dz)
 plt.xlabel("z")
 
 plt.figure()
-plt.plot(x, np.abs(n_TF_pbb[61,:,61])**2*dx*dy*dz)
-plt.plot(x, np.abs(psiE[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(n_TF_pbb[cut,:,cut])**2*dx*dy*dz)
+plt.plot(x, np.abs(psiE[cut,:,cut])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("psiE")
 plt.legend(["Thomas-Fermi", "psiG"])
 
 plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,61,61]**2)*dx*dy*dz)
-plt.plot(y, np.abs(psiE[:,61,61]**2)*dx*dy*dz)
+plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
+plt.plot(y, np.abs(psiE[:,cut,cut]**2)*dx*dy*dz)
 plt.xlabel("y")
 
 plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[61,61,:]**2)*dx*dy*dz)
-plt.plot(z, np.abs(psiE[61,61,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
+plt.plot(z, np.abs(psiE[cut,cut,:]**2)*dx*dy*dz)
 plt.xlabel("z")
 
 plt.figure()
-plt.plot(x, np.abs(LG[61,:,61])**2*dx*dy*dz)
+plt.plot(x, np.abs(LG[cut,:,cut])**2*dx*dy*dz)
 plt.xlabel("x")
 plt.title("LG")
 #
