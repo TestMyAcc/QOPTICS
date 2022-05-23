@@ -4,6 +4,7 @@
 import cupy as cp
 import numpy as np
 import h5py
+import utils.dirutils as dd
 import os
 from os.path import join, expanduser
 from scipy.special import genlaguerre
@@ -11,7 +12,13 @@ from scipy.special import genlaguerre
 
 def computation(parameter,nj,stepJ,fileformat):
     param = cp.array(parameter)
-    fileformat = "{}" + fileformat
+    fileformat = "{}_" + fileformat
+    base = dd.base()
+    path = join(base, 'tmp')
+    try: 
+        os.mkdir(path)
+    except OSError as error: 
+        print(error)
     # Meta-parameters and parameters
     Nx = 121
     Ny = 121
@@ -25,7 +32,7 @@ def computation(parameter,nj,stepJ,fileformat):
     dx = cp.diff(x)[0]
     dy = cp.diff(y)[0]
     dz = cp.diff(z)[0]
-    dw = 1e-6   # condition for converge : <1e-3*dx**2
+    dw = 1e-6  # condition for converge : <1e-3*dx**2
 
     [X,Y,Z] = cp.meshgrid(x,y,z)
     
@@ -66,7 +73,7 @@ def computation(parameter,nj,stepJ,fileformat):
     total = cp.sum(cp.abs(TF_pbb)**2*dx*dy*dz)
     n_TF_pbb = TF_pbb/cp.sqrt(total,dtype=cp.complex128)
 
-    psiG = cp.array(cp.abs(n_TF_pbb)*2,dtype=cp.complex128)
+    psiG = cp.array(cp.abs(n_TF_pbb),dtype=cp.complex128)     
     psiE = cp.zeros_like(n_TF_pbb)
     # psiG = cp.array(cp.ones(TF_pbb.shape)+5,dtype=cp.complex128)
     # psiE = cp.array(cp.ones(TF_pbb.shape)+5,dtype=cp.complex128)
@@ -151,12 +158,35 @@ def computation(parameter,nj,stepJ,fileformat):
                         psiE[:, 1:Ny-1, 1:Nx-1, 2:Nz]
                     - 2*psiE[:, 1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + psiE[:, 1:Ny-1, 1:Nx-1, 0:Nz-2]))
-        psiE = dw * ( Lap - (Epot + Gee*cp.abs(psiE)**2 + Geg*cp.abs(psiG)**2) * psiE \
+        psiE_n = dw * ( Lap - (Epot + Gee*cp.abs(psiE)**2 + Geg*cp.abs(psiG)**2) * psiE \
                         - LG*psiG  +cp.einsum("i,ijkl->ijkl",psiEmu,psiE)) + psiE
+        
+        if ((j+1) % stepJ) == 0 or j == 0:
+            # convergence test
+            lmaxE = cp.abs(cp.max(psiE, axis=(1,2,3)))
+            cmaxE = cp.abs(cp.max(psiE_n, axis=(1,2,3)))
+            lmaxG = cp.abs(cp.max(psiG, axis=(1,2,3)))
+            cmaxG = cp.abs(cp.max(psiG_n, axis=(1,2,3)))
+            diffG = cp.abs(cmaxG - lmaxG)/cmaxG
+            diffE = cp.abs(cmaxE - lmaxE)/cmaxE
+            diffG = diffG[:,cp.newaxis]
+            diffE = diffE[:,cp.newaxis]
+            if (j == 0):
+                convergeG = cp.zeros((len(param),1))
+                convergeE = cp.zeros((len(param),1))
+                convergeG[:,0] = diffG[:,0]
+                convergeE[:,0] = diffE[:,0]
+            else:
+                convergeG = cp.append(convergeG, diffG,axis=1)
+                convergeE = cp.append(convergeE, diffE,axis=1)
+            
+        psiE = psiE_n
         psiG = psiG_n
         
+            
+        
         if (j % stepJ) == 0 and j != 0:
-                #  update energy constraint 
+            #  update energy constraint 
             SumPsiG = cp.sum( cp.abs(psiG)**2*dx*dy*dz, axis=(1,2,3))
             SumPsiE = cp.sum( cp.abs(psiE)**2*dx*dy*dz, axis=(1,2,3))
             Nfactor = SumPsiG +  SumPsiE  
@@ -167,20 +197,28 @@ def computation(parameter,nj,stepJ,fileformat):
             psiGmuArray[:,J] = psiGmu
             psiEmuArray[:,J] = psiEmu
             
-        if ((j+1) % stepJ) == 0 and j != 0:
-            
-            fs =  [ h5py.File( join( expanduser("~/Data"), fileformat.format(j,i) ) , "w" ) for i in param ]
+        if ((j+1) % stepJ) == 0 and j != 0: #last step must store
+            # storing data
+            fs =  [ h5py.File( join( expanduser(path), fileformat.format(j+1,i) ) , "w" ) for i in param ]
             _psiG  = psiG.get()
             _psiE  = psiE.get()
             _LG  = LG.get()
             _psiGmuArray = psiGmuArray.get()
             _psiEmuArray = psiEmuArray.get()
+            convergeG = convergeG.get()
+            convergeE = convergeE.get()
             
             
+            # one file store one case
             for idx, f in enumerate(fs):
                 f['psiG'] = _psiG[idx,...]
                 f['psiE'] = _psiE[idx,...]
                 f['LG'] = _LG[idx,...]
+                f['psiGmuArray'] = _psiGmuArray[idx,...]
+                f['psiEmuArray'] = _psiEmuArray[idx,...]
+                f['convergeG'] = convergeG[idx,...]
+                f['convergeE'] = convergeE[idx,...]
+                f['Metaparameters/j'] = j
                 f['Metaparameters/Nx'] = Nx
                 f['Metaparameters/Ny'] = Ny
                 f['Metaparameters/Nz'] = Nz
@@ -205,12 +243,10 @@ def computation(parameter,nj,stepJ,fileformat):
                 f['Parameters/L'] = _L[idx]
                 f['Parameters/W0'] = W0
                 f['Parameters/Lambda'] = Lambda
-                f['psiGmuArray'] = _psiGmuArray[idx,...]
-                f['psiEmuArray'] = _psiEmuArray[idx,...]
                 # print("storing succeeded!")
     
-    for f in fs:
-        f.close()
+            _fs = [ f.close() for f in fs ]
+                
         
     return 
     
