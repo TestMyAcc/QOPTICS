@@ -11,7 +11,7 @@ from utils.dummyconst import *
 
 #      return Energy
 #%%
-path = "/home/quojinhao/Data/99999scan_param_L1_clusterGPU_stepResults.h5"
+path = "/home/quojinhao/Data/con_test/21000L2con_test_dt10x.h5"
 data = dd.retrieve(path)
 
 module = sys.modules[__name__]
@@ -90,12 +90,6 @@ plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
 plt.plot(z, np.abs(psiG[cut,cut,:]**2)*dx*dy*dz)
 plt.xlabel("z")
 
-plt.figure()
-plt.plot(x, np.abs(n_TF_pbb[cut,:,cut])**2*dx*dy*dz)
-plt.plot(x, np.abs(psiE[cut,:,cut])**2*dx*dy*dz)
-plt.xlabel("x")
-plt.title("psiE")
-plt.legend(["Thomas-Fermi", "psiG"])
 
 plt.figure()
 plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
