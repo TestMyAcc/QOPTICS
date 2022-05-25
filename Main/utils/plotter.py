@@ -181,7 +181,7 @@ def plotdata(path:str, zindice:int, lims:list[tuple], plotwhat:str='phase', curr
         r'$W_{z}=%.2f$' % (Wz, ),
         r'$L=%d$' % (L, ),
         r'$Nbec=%d$' % (Nbec, ),
-        r'$nj=%d$' % (nj, ),
+        r'$j=%d$' % (j, ),
         # r'$\mathrm{median}=%.2f$' % (median, ),
         # r'$\sigma=%.2f$' % (sigma, )))
     ))
