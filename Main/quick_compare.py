@@ -10,8 +10,10 @@ from utils.dummyconst import *
 #          (-0.5 *del2.del2(_psi,_dx,_dy,_dz)+(Epot + _G*np.abs(_psi)**2)*_psi)*_dx*_dy*_dz)))
 
 #      return Energy
+
+
 #%%
-path = "/home/quojinhao/Data/con_test/21000L2con_test_dt10x.h5"
+path = "/home/quojinhao/Data/previous/LG10_121-121-121.h5"
 data = dd.retrieve(path)
 
 module = sys.modules[__name__]
@@ -19,144 +21,55 @@ for name, value in data.items():
     setattr(module, name, value)
 if 'LGdata' in data: # The light is stored as variable named 'LGdata'
     LG = LGdata
-#%%
-
-x = np.linspace(-Lx,Lx,Nx)
-y = np.linspace(-Ly,Ly,Ny)
-z = np.linspace(-Lz,Lz,Nz)
-dx = np.diff(x)[0]
-dy = np.diff(y)[0]
-dz = np.diff(z)[0]
-X,Y,Z = np.meshgrid(x,y,z)
-# Some constants
-pi = 3.14159265359
-hbar = 1.054571800139113e-34 
-m = 1.411000000000000e-25  # Rb atoms
-# BEC parameters
-As = 5.82e-09
-Nbec = 10000
-Rabi = 1000
-Wx = 2000
-Wy = 2000
-Wz = 2000
-# unit = 1.222614572474304e-06;
-unit = np.sqrt(hbar/m/Wz)
-
-Ggg = (4*pi*hbar**2*As*Nbec/m)*unit**-3*(hbar*Wz)**-1
-Gee = Ggg  
-Gge = 0
-Geg = 0
-Epot = ( (Wx**2*X**2 + Wy**2*Y**2 + Wz**2*Z**2 )
-            / (2*Wz**2) )
-# circular potential
-psiGmu = (15*Ggg / ( 16*pi*np.sqrt(2) )  )**(2/5)  
-psiEmu = (15*Gee / ( 16*pi*np.sqrt(2) )  )**(2/5) 
 
 
+cut = 60
 
-# %%
-TF_amp = np.array((psiGmu-Epot)/Ggg,dtype=np.cfloat)
-np.clip(TF_amp, 0, np.inf,out=TF_amp)
-TF_pbb = np.sqrt(TF_amp)
-total = np.sum(np.abs(TF_pbb)**2*dx*dy*dz)
-n_TF_pbb = TF_pbb/np.sqrt(total)
+# #%%
+# print("abs|n_TF_pbb|^2")
+# print(np.sum(np.abs(n_TF_pbb)**2*dx*dy*dz))
+# print("abs|psiG|^2")
+# print(np.sum(np.abs(psiG)**2*dx*dy*dz))
+# print("abs|psiE|^2")
+# print(np.sum(np.abs(psiE)**2*dx*dy*dz))
+# #%%
+# import plotly.graph_objects as go
+# import matplotlib.pyplot as plt
+# cut =  60
+# plt.figure()
+# plt.plot(x, np.abs(n_TF_pbb[cut,:,cut])**2*dx*dy*dz)
+# plt.plot(x, np.abs(psiG[cut,:,cut])**2*dx*dy*dz)
+# plt.xlabel("x")
+# plt.title("psiG")
+# plt.legend(["Thomas-Fermi", "psiG"])
+
+# plt.figure()
+# plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
+# plt.plot(y, np.abs(psiG[:,cut,cut]**2)*dx*dy*dz)
+# plt.xlabel("y")
+
+# plt.figure()
+# plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
+# plt.plot(z, np.abs(psiG[cut,cut,:]**2)*dx*dy*dz)
+# plt.xlabel("z")
 
 
-#%%
-print("abs|n_TF_pbb|^2")
-print(np.sum(np.abs(n_TF_pbb)**2*dx*dy*dz))
-print("abs|psiG|^2")
-print(np.sum(np.abs(psiG)**2*dx*dy*dz))
-print("abs|psiE|^2")
-print(np.sum(np.abs(psiE)**2*dx*dy*dz))
-#%%
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-cut =  60
-plt.figure()
-plt.plot(x, np.abs(n_TF_pbb[cut,:,cut])**2*dx*dy*dz)
-plt.plot(x, np.abs(psiG[cut,:,cut])**2*dx*dy*dz)
-plt.xlabel("x")
-plt.title("psiG")
-plt.legend(["Thomas-Fermi", "psiG"])
+# plt.figure()
+# plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
+# plt.plot(y, np.abs(psiE[:,cut,cut]**2)*dx*dy*dz)
+# plt.xlabel("y")
+
+# plt.figure()
+# plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
+# plt.plot(z, np.abs(psiE[cut,cut,:]**2)*dx*dy*dz)
+# plt.xlabel("z")
 
 plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
-plt.plot(y, np.abs(psiG[:,cut,cut]**2)*dx*dy*dz)
-plt.xlabel("y")
-
-plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
-plt.plot(z, np.abs(psiG[cut,cut,:]**2)*dx*dy*dz)
-plt.xlabel("z")
-
-
-plt.figure()
-plt.plot(y, np.abs(n_TF_pbb[:,cut,cut]**2)*dx*dy*dz)
-plt.plot(y, np.abs(psiE[:,cut,cut]**2)*dx*dy*dz)
-plt.xlabel("y")
-
-plt.figure()
-plt.plot(z, np.abs(n_TF_pbb[cut,cut,:]**2)*dx*dy*dz)
-plt.plot(z, np.abs(psiE[cut,cut,:]**2)*dx*dy*dz)
-plt.xlabel("z")
-
-plt.figure()
-plt.plot(x, np.abs(LG[cut,:,cut])**2*dx*dy*dz)
+plt.plot(x, np.abs(LG[cut,:,cut]))
 plt.xlabel("x")
 plt.title("LG")
 #
 
-# #%%
-# plt.figure()
-# plt.plot(x, np.abs(n_TF_pbb[60,:,61])**2*dx*dy*dz)
-# plt.xlabel("x")
-# plt.title("n_TF_pbb")
-
-# plt.figure()
-# plt.plot(y, np.abs(n_TF_pbb[:,60,61]**2)*dx*dy*dz)
-# plt.xlabel("y")
-# plt.title("n_TF_pbb")
-
-# plt.figure()
-# plt.plot(z, np.abs(n_TF_pbb[60,61,:]**2)*dx*dy*dz)
-# plt.xlabel("z")
-# plt.title("n_TF_pbb")
-
-# plt.figure()
-# plt.plot(x, np.abs(psiG[60,:,61])**2*dx*dy*dz)
-# plt.xlabel("x")
-# plt.title("psiG")
-
-# plt.figure()
-# plt.plot(y, np.abs(psiG[:,60,61]**2)*dx*dy*dz)
-# plt.xlabel("y")
-# plt.title("psiG")
-
-# plt.figure()
-# plt.plot(z, np.abs(psiG[60,61,:]**2)*dx*dy*dz)
-# plt.xlabel("z")
-# plt.title("psiG")
-
-# plt.figure()
-# plt.plot(x, np.abs(psiE[60,:,61])**2*dx*dy*dz)
-# plt.xlabel("x")
-# plt.title("psiE")
-
-# plt.figure()
-# plt.plot(y, np.abs(psiE[:,60,61]**2)*dx*dy*dz)
-# plt.xlabel("y")
-# plt.title("psiE")
-
-# plt.figure()
-# plt.plot(z, np.abs(psiE[60,61,:]**2)*dx*dy*dz)
-# plt.xlabel("z")
-# plt.title("psiE")
-
-# plt.figure()
-# plt.plot(x, np.abs(LGdata[60,:,61])**2*dx*dy*dz)
-# plt.xlabel("x")
-# plt.title("LG")
 
 
 # %%

@@ -6,6 +6,8 @@
 Lx = Ly = Lz = 0
 Nz = Ny = Nx = 0
 Wx = Wy = Wz = 0
+dx = dy = dz = 0
+x = y = z = 0
 Ggg = Gee  = 0
 psiG = psiE = LG = LGdata = 0
 m = 0

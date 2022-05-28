@@ -53,6 +53,9 @@ def myLG(X,Y,Z,_W0,_Lambda,_L,_P,_path):
     
     with h5py.File(_path, "w") as f:
         f['LGdata'] = LGdata
+        f['MetaParameters/X'] = X
+        f['MetaParameters/Y'] = Y
+        f['MetaParameters/Z'] = Z
         f['Parameters/W0'] = _W0
         f['Parameters/Lambda'] = _Lambda
         print(f"storing light as {_path}")

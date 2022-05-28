@@ -23,16 +23,16 @@ def computation(parameter,nj,stepJ,fileformat):
     Nx = 121
     Ny = 121
     Nz = 121
-    Lx = 10
-    Ly = 10
-    Lz = 10
+    Lx = 20
+    Ly = 20
+    Lz = 20
     x = cp.linspace(-Lx,Lx,Nx)
     y = cp.linspace(-Ly,Ly,Ny)
     z = cp.linspace(-Lz,Lz,Nz)
     dx = cp.diff(x)[0]
     dy = cp.diff(y)[0]
     dz = cp.diff(z)[0]
-    dw = 1e-6  # condition for converge : <1e-3*dx**2
+    dw = 2e-5  # condition for converge : <1e-3*dx**2
 
     [X,Y,Z] = cp.meshgrid(x,y,z)
     
@@ -42,22 +42,19 @@ def computation(parameter,nj,stepJ,fileformat):
     m = 1.411000000000000e-25  # Rb atoms
     # BEC parameters
     As = 5.82e-09
-    Nbec = 10000
+    Nbec = 400000
     Rabi = 1000
-    Wx = 2000
-    Wy = 2000
-    Wz = 2000
+    Wx = 452
+    Wy = 452
+    Wz = 509
     # unit = 1.222614572474304e-06;
     unit = cp.sqrt(hbar/m/Wz)
 
-    Ggg = cp.array((4*pi*hbar**2*As*Nbec/m)*unit**-3*(hbar*Wz)**-1)
+    Ggg = cp.array((4*pi*hbar**2*As*Nbec/m)*unit**  -3*(hbar*Wz)**-1)
     Gee = cp.array(Ggg)
     Gge = cp.array(0)
     Geg = cp.array(0)
-    _Ggg = Ggg.get()
-    _Gee = Gee.get()
-    _Gge = Gge.get()
-    _Geg = Geg.get()
+    
     
     Epot = ( (Wx**2*X**2 + Wy**2*Y**2 + Wz**2*Z**2 )
                 / (2*Wz**2) )
@@ -91,8 +88,8 @@ def computation(parameter,nj,stepJ,fileformat):
     
     # Laguerre-Gaussian laser
     L = cp.array(param)
-    W0 = 1
-    Lambda = 1
+    W0 = 10e-6/unit
+    Lambda = 790e-9/unit
     P = 0
     Zrl = cp.pi*W0**2/Lambda                         #Rayleigh length
     W= W0*cp.sqrt(1+(Z/Zrl)**2)  
@@ -207,7 +204,12 @@ def computation(parameter,nj,stepJ,fileformat):
             _psiEmuArray = psiEmuArray.get()
             convergeG = convergeG.get()
             convergeE = convergeE.get()
-            
+            _Ggg = Ggg.get()
+            _Gee = Gee.get()
+            _Gge = Gge.get()
+            _Geg = Geg.get()
+            _W0 = W0.get()
+            _Lambda = Lambda.get()
             
             # one file store one case
             for idx, f in enumerate(fs):
@@ -241,8 +243,8 @@ def computation(parameter,nj,stepJ,fileformat):
                 f['Parameters/Gge'] = _Gge
                 f['Parameters/Geg'] = _Geg 
                 f['Parameters/L'] = _L[idx]
-                f['Parameters/W0'] = W0
-                f['Parameters/Lambda'] = Lambda
+                f['Parameters/W0'] = _W0
+                f['Parameters/Lambda'] = _Lambda
                 # print("storing succeeded!")
     
             _fs = [ f.close() for f in fs ]
