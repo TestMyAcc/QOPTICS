@@ -112,7 +112,9 @@ def computation(parameter,nj,stepJ,fileformat):
     # if (L == 0 and P == 0):
     #     Plong = cp.exp(-1j*((2*cp.pi/Lambda)*Z - Guoy))
     #     LG = (W0/W)*AGauss*Ptrans1*Ptrans2*Plong
+    
     LG = 1*LG/cp.max(cp.abs(LG)) 
+    LG = 0.5*Rabi*LG
 
 
     psiEmuArray = cp.zeros((len(param), int( np.ceil(nj/stepJ) )), dtype=cp.float32)
