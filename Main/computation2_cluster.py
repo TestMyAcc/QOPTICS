@@ -43,7 +43,8 @@ def computation(parameter,nj,stepJ,fileformat):
     # BEC parameters
     As = 5.82e-09
     Nbec = 400000
-    Rabi = 1000
+    Rabi = 57
+    d = 0  #Raman detuning
     Wx = 452
     Wy = 452
     Wz = 509
@@ -113,6 +114,7 @@ def computation(parameter,nj,stepJ,fileformat):
     #     Plong = cp.exp(-1j*((2*cp.pi/Lambda)*Z - Guoy))
     #     LG = (W0/W)*AGauss*Ptrans1*Ptrans2*Plong
     
+    
     LG = 1*LG/cp.max(cp.abs(LG)) 
     LG = 0.5*Rabi*LG
 
@@ -157,7 +159,7 @@ def computation(parameter,nj,stepJ,fileformat):
                         psiE[:, 1:Ny-1, 1:Nx-1, 2:Nz]
                     - 2*psiE[:, 1:Ny-1, 1:Nx-1, 1:Nz-1] 
                     + psiE[:, 1:Ny-1, 1:Nx-1, 0:Nz-2]))
-        psiE_n = dw * ( Lap - (Epot + Gee*cp.abs(psiE)**2 + Geg*cp.abs(psiG)**2) * psiE \
+        psiE_n = dw * ( Lap - (Epot + Gee*cp.abs(psiE)**2 + Geg*cp.abs(psiG)**2 - 1j*d/2) * psiE \
                         - LG*psiG  +cp.einsum("i,ijkl->ijkl",psiEmu,psiE)) + psiE
         
         if ((j+1) % stepJ) == 0 or j == 0:
@@ -256,8 +258,8 @@ def computation(parameter,nj,stepJ,fileformat):
     
 #%%
 if __name__ == "__main__":
-    L1 = np.arange(1,2)
+    L1 = np.arange(1,7)
     fileformat = "scan_param_L{}_master.h5"
-    n = 2000000
-    computation(L1,n,n-1,fileformat)
+    n = 100000
+    computation(L1,n,10000,fileformat)
 # %%
