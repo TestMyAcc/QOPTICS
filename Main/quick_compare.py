@@ -13,7 +13,7 @@ from utils.dummyconst import *
 
 
 #%%
-path = "/home/quojinhao/Data/previous/LG10_121-121-121.h5"
+path = "/home/quojinhao/Data/results/LG10_121-121-121.h5"
 data = dd.retrieve(path)
 
 module = sys.modules[__name__]

@@ -32,7 +32,7 @@ def computation(parameter,nj,stepJ,fileformat):
     dx = cp.diff(x)[0]
     dy = cp.diff(y)[0]
     dz = cp.diff(z)[0]
-    dw = 2e-5  # condition for converge : <1e-3*dx**2
+    dw = 1e-6  # condition for converge : <1e-3*dx**2
 
     [X,Y,Z] = cp.meshgrid(x,y,z)
     
@@ -109,6 +109,16 @@ def computation(parameter,nj,stepJ,fileformat):
     PGuoy = cp.exp(1j*Guoy)
     LG = (W0/W)*AL*ALpoly*AGauss*Ptrans1*Ptrans2*PGuoy
     
+<<<<<<< Updated upstream
+
+    #Cover light in half along x-axis
+    LG[:, :, 60:, :] = 0
+
+=======
+    # Cover light in half along x-axis
+    # LG[:, :, 60:, :] = 0
+    
+>>>>>>> Stashed changes
     #TODO: correct the Gaussian beam
     # if (L == 0 and P == 0):
     #     Plong = cp.exp(-1j*((2*cp.pi/Lambda)*Z - Guoy))
@@ -259,7 +269,16 @@ def computation(parameter,nj,stepJ,fileformat):
 #%%
 if __name__ == "__main__":
     L1 = np.arange(1,7)
-    fileformat = "scan_param_L{}_master.h5"
-    n = 100000
-    computation(L1,n,10000,fileformat)
+<<<<<<< Updated upstream
+    fileformat = "L{}_10um_Light_dt1e-6_halflight.h5"
+=======
+    fileformat = "L{}_10um_Light_dt1e-6.h5"
+>>>>>>> Stashed changes
+    n = 1000000
+
+    computation(L1,n,100000,fileformat)
 # %%
+<<<<<<< Updated upstream
+
+=======
+>>>>>>> Stashed changes
