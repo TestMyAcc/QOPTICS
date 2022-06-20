@@ -32,7 +32,7 @@ def computation(parameter,nj,stepJ,fileformat):
     dx = cp.diff(x)[0]
     dy = cp.diff(y)[0]
     dz = cp.diff(z)[0]
-    dw = 1e-6  # condition for converge : <1e-3*dx**2
+    dw = 1e-5   # condition for converge : <1e-3*dx**2
 
     [X,Y,Z] = cp.meshgrid(x,y,z)
     
@@ -89,7 +89,7 @@ def computation(parameter,nj,stepJ,fileformat):
     
     # Laguerre-Gaussian laser
     L = cp.array(param)
-    W0 = 10e-6/unit
+    W0 = 5e-6/unit
     Lambda = 790e-9/unit
     P = 0
     Zrl = cp.pi*W0**2/Lambda                         #Rayleigh length
@@ -264,8 +264,8 @@ def computation(parameter,nj,stepJ,fileformat):
     
 #%%
 if __name__ == "__main__":
-    L1 = np.arange(1,7)
-    fileformat = "L{}_10um_Light_dt1e-6_halflight.h5"
-    n = 1000000
-    computation(L1,n,100000,fileformat)
+    L1 = np.arange(2,7)
+    fileformat = "L{}_5um_dt1e-6.h5"
+    n = 300000
+    computation(L1,n,30000,fileformat)
 # %%

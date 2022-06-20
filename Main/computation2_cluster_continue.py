@@ -172,7 +172,7 @@ def computation(read, added_n ,fileformat):
     
 #%%
 if __name__ == "__main__":
-    file = os.path.join(dd.base(), 'tmp', '100000_L1_10um_1e-6.h5')
+    file = os.path.join(dd.base(), 'tmp', '100000_L7_10um_1e-6.h5')
     fileformat = "L{}_10um_1e-6.h5"
     addn = 900000
     computation(file, addn, fileformat)

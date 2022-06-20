@@ -102,7 +102,8 @@ def retrieve(filename, sub:dict[str, str]={}):
         _walk(f, datas, sub)
         
         if ('LGfile' in f): # if LG data is stored seperately
-            lgpath = _os.path.expanduser(f['LGfile'][()])
+            # lgpath = _os.path.expanduser(f['LGfile'][()])
+            lgpath = ''  #Just ignore the sperated-stored L.G. data. (2012/06/20)
             if (lgpath != ''):
                 with _h5py.File(lgpath, "r") as f_lg:
                     _walk(f_lg,datas,sub)
